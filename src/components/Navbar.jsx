@@ -19,7 +19,10 @@ export default function Navbar({ currentTab, setCurrentTab, onOpenBackup }) {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-slate-900 text-white shadow-md border-b border-rose-600/30">
+    <header 
+      className="sticky top-0 z-40 bg-slate-900 text-white shadow-md border-b border-rose-600/30 safe-top-nav"
+      style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 0px)' }}
+    >
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo / Brand */}
         <div 
