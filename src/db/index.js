@@ -8,11 +8,7 @@ db.version(1).stores({
   rotinas: '++id, titulo, horario, ativo'
 });
 
-// Limpa as rotinas de exemplo existentes para o usuário cadastrar as suas próprias
+// Nenhuma ação destrutiva: os dados do usuário ficam 100% preservados
 export async function seedInitialDataIfNeeded() {
-  const flagKey = 'sky_rotinas_cleared_user_req_v2';
-  if (!localStorage.getItem(flagKey)) {
-    await db.rotinas.clear();
-    localStorage.setItem(flagKey, 'true');
-  }
+  // Mantido vazio para proteger totalmente as rotinas e adições feitas pelo usuário
 }
