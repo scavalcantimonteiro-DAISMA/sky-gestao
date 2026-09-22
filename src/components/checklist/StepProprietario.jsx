@@ -1,6 +1,7 @@
 import React from 'react';
 import { UserCheck, Activity, RotateCcw, TrendingUp, ShoppingBag, MessageSquare, AlertCircle } from 'lucide-react';
 import PhotoUploader from './PhotoUploader';
+import SignaturePad from './SignaturePad';
 
 export default function StepProprietario({ data, onChange }) {
   const prop = data.proprietario || {
@@ -18,7 +19,8 @@ export default function StepProprietario({ data, onChange }) {
     permanencia: data.vendas?.permanencia || '',
     conversaAlinhamento: '',
     pendencia: '',
-    foto: ''
+    foto: '',
+    assinatura: ''
   };
 
   const updateProp = (field, value) => {
@@ -248,6 +250,14 @@ export default function StepProprietario({ data, onChange }) {
         photo={prop.foto}
         onPhotoChange={(val) => updateProp('foto', val)}
       />
+
+      {/* Assinatura Digital do Proprietário */}
+      <div className="pt-2 border-t border-slate-200">
+        <SignaturePad
+          value={prop.assinatura}
+          onChange={(val) => updateProp('assinatura', val)}
+        />
+      </div>
     </div>
   );
 }

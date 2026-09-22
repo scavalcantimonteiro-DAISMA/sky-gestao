@@ -168,7 +168,53 @@ export function generateAtaPDF(ata) {
 
   currentY = doc.lastAutoTable.finalY + 8;
 
-  // 8. Seção de Fotos Anexadas (se houver fotos nos setores)
+  // 8. Bloco de Assinaturas Formais
+  if (currentY > 230) {
+    doc.addPage();
+    currentY = 25;
+  } else {
+    currentY += 8;
+  }
+
+  const supervisorName = ata.supervisor || 'Supervisor de Campo SKY';
+  const credenciadoName = ata.credenciado || 'Proprietário do Credenciado';
+
+  // Assinatura do Supervisor (Lado Esquerdo)
+  doc.setDrawColor(148, 163, 184);
+  doc.line(18, currentY + 18, 95, currentY + 18);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(...darkNavy);
+  doc.text(supervisorName, 56, currentY + 22, { align: 'center' });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 116, 139);
+  doc.text('Supervisor de Campo SKY Brasil', 56, currentY + 26, { align: 'center' });
+
+  // Assinatura do Proprietário com desenho na tela (Lado Direito)
+  doc.setDrawColor(148, 163, 184);
+  doc.line(115, currentY + 18, 192, currentY + 18);
+  
+  if (prop.assinatura) {
+    try {
+      doc.addImage(prop.assinatura, 'PNG', 125, currentY - 2, 55, 18);
+    } catch (e) {
+      console.warn('Erro ao inserir assinatura no PDF:', e);
+    }
+  }
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(...darkNavy);
+  doc.text(credenciadoName, 153, currentY + 22, { align: 'center' });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 116, 139);
+  doc.text('Proprietário / Gestor do Credenciado', 153, currentY + 26, { align: 'center' });
+
+  currentY += 34;
+
+  // 9. Seção de Fotos Anexadas (se houver fotos nos setores)
   const photos = [
     { title: 'Torre de Controle', data: tc.foto },
     { title: 'Estoque', data: est.foto },

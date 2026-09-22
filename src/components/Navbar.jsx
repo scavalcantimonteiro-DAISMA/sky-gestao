@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ClipboardList, Clock, Bell, Home, CheckCircle2, Menu, X, Smartphone } from 'lucide-react';
+import { ClipboardList, Clock, Bell, Home, CheckCircle2, Menu, X, Smartphone, Database } from 'lucide-react';
 import { requestNotificationPermission, showNativeNotification } from '../services/notificationService';
 
-export default function Navbar({ currentTab, setCurrentTab }) {
+export default function Navbar({ currentTab, setCurrentTab, onOpenBackup }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notifState, setNotifState] = useState(
     'Notification' in window ? Notification.permission : 'unsupported'
@@ -76,11 +76,21 @@ export default function Navbar({ currentTab, setCurrentTab }) {
             Gestão do Dia & Lembretes
           </button>
 
+          {/* Botão de Backup / Exportar Excel */}
+          <button
+            onClick={onOpenBackup}
+            title="Backup e Exportação para Excel"
+            className="px-2.5 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-1.5"
+          >
+            <Database className="w-4 h-4 text-rose-400" />
+            <span className="hidden lg:inline">Backup / Excel</span>
+          </button>
+
           {/* Botão de Notificação */}
           <button
             onClick={handleRequestNotif}
             title={notifState === 'granted' ? 'Notificações ativadas' : 'Ativar notificações'}
-            className={`ml-2 px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border transition-all ${
+            className={`ml-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border transition-all ${
               notifState === 'granted'
                 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
                 : 'bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30'
@@ -93,6 +103,14 @@ export default function Navbar({ currentTab, setCurrentTab }) {
 
         {/* Mobile Menu Button */}
         <div className="flex items-center gap-2 md:hidden">
+          <button
+            onClick={onOpenBackup}
+            className="p-2 rounded-lg text-slate-300 hover:text-white bg-slate-800 border border-slate-700"
+            title="Backup & Excel"
+          >
+            <Database className="w-4 h-4 text-rose-400" />
+          </button>
+
           <button
             onClick={handleRequestNotif}
             className={`p-2 rounded-lg text-xs border ${
@@ -156,6 +174,14 @@ export default function Navbar({ currentTab, setCurrentTab }) {
           >
             <Clock className="w-4 h-4" />
             Gestão do Dia & Pendências
+          </button>
+
+          <button
+            onClick={() => { onOpenBackup(); setMobileMenuOpen(false); }}
+            className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2.5 text-rose-400 hover:bg-slate-800"
+          >
+            <Database className="w-4 h-4" />
+            Fazer Backup / Exportar Excel
           </button>
         </div>
       )}

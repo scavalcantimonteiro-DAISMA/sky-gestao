@@ -139,3 +139,64 @@ export function openOutlookWebCalendar(title, description, startDateTime, endDat
   const url = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(description)}&startdt=${encodeURIComponent(startISO)}&enddt=${encodeURIComponent(endISO)}`;
   window.open(url, '_blank');
 }
+
+// Formata mensagem resumida e estilizada para envio no WhatsApp
+export function formatAtaWhatsAppMessage(ata) {
+  const dataFormatada = formatDateBR(ata.dataVisita);
+  const tc = ata.torreControle || {};
+  const est = ata.estoque || {};
+  const ven = ata.vendas || {};
+  const prop = ata.proprietario || {};
+
+  let pendenciasTexto = '';
+  if (ata.todasPendencias && ata.todasPendencias.length > 0) {
+    pendenciasTexto = ata.todasPendencias
+      .map((p, idx) => `  ${idx + 1}️⃣ *[${p.setor}]* ${p.descricao}`)
+      .join('\n');
+  } else {
+    pendenciasTexto = '  ✅ Nenhuma pendência crítica anotada.';
+  }
+
+  return `🔴 *ATA DE REUNIÃO - SKY BRASIL*
+━━━━━━━━━━━━━━━━━━━━
+🏢 *Credenciado:* ${ata.credenciado}
+📍 *Cidade:* ${ata.cidade}
+📅 *Data:* ${dataFormatada}
+👤 *Supervisor:* ${ata.supervisor || 'Supervisor SKY'}
+━━━━━━━━━━━━━━━━━━━━
+
+📡 *1. TORRE DE CONTROLE*
+• OSs AT em Caixa: ${tc.osAtCaixa ?? 0}
+• OSs PP em Caixa: ${tc.osPpCaixa ?? 0}
+• OSs Vencidas: ${tc.temOsVencidas ? `⚠️ SIM (${tc.qtdVencidas || 0} - ${tc.tipoVencidas || 'N/A'})` : '✅ NÃO'}
+• Técnicos em Campo: ${tc.tecnicosCampo ?? 0}
+${tc.pendencia ? `• _Pendência:_ ${tc.pendencia}\n` : ''}
+📦 *2. ESTOQUE*
+• Material p/ Semana: ${est.materialSuficiente || 'Sim'}
+• Organização: ${est.organizado || 'Sim'}
+• Retiradas do Dia: ${est.retiradasDia || '0'}
+${est.pendencia ? `• _Pendência:_ ${est.pendencia}\n` : ''}
+🎯 *3. VENDAS*
+• Pós: ${ven.vendasPos ?? 0} | NP: ${ven.vendasNp ?? 0} | Recarga: ${ven.vendasRecarga ?? 0}
+• Chip: ${ven.vendasChip ?? 0} | Seguro: ${ven.vendasSeguro ?? 0}
+• Permanência: ${ven.permanencia || '0%'}
+${ven.pendencia ? `• _Pendência:_ ${ven.pendencia}\n` : ''}
+🤝 *4. PROPRIETÁRIO & SERVIÇOS*
+• T.A AT: ${prop.indicadorTaAt || 'N/A'} | T.A PP: ${prop.indicadorTaPp || 'N/A'}
+• Retiradas: ${prop.indicadorRetiradas || 'N/A'}
+• Reabertura AT: ${prop.indicadorReaberturaAt || 'N/A'} | PP: ${prop.indicadorReaberturaPp || 'N/A'}
+${prop.conversaAlinhamento ? `• _Alinhamento:_ ${prop.conversaAlinhamento}\n` : ''}
+━━━━━━━━━━━━━━━━━━━━
+⚠️ *PENDÊNCIAS DA VISITA:*
+${pendenciasTexto}
+━━━━━━━━━━━━━━━━━━━━
+_Enviado via App SKY Gestão de Campo_`;
+}
+
+// Abre o WhatsApp com a mensagem pronta para enviar no grupo ou privado
+export function openWhatsAppAta(ata) {
+  const msg = formatAtaWhatsAppMessage(ata);
+  const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+}
+

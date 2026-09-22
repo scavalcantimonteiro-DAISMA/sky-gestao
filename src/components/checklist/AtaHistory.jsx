@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { 
   History, Search, FileText, Download, Mail, Trash2, Calendar, 
-  MapPin, Building2, AlertCircle, Eye, PlusCircle 
+  MapPin, Building2, AlertCircle, Eye, PlusCircle, MessageSquare
 } from 'lucide-react';
 import { db } from '../../db';
 import { generateAtaPDF } from '../../services/pdfGenerator';
-import { openOutlookEmailForAta, formatDateBR } from '../../services/outlookService';
+import { openOutlookEmailForAta, openWhatsAppAta, formatDateBR } from '../../services/outlookService';
 import AtaSummaryModal from './AtaSummaryModal';
 
 export default function AtaHistory({ onNewChecklist }) {
@@ -178,6 +178,14 @@ export default function AtaHistory({ onNewChecklist }) {
                       title="Baixar PDF"
                     >
                       <Download className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); openWhatsAppAta(ata); }}
+                      className="p-2 rounded-lg bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-600 transition"
+                      title="Enviar Resumo no WhatsApp"
+                    >
+                      <MessageSquare className="w-4 h-4" />
                     </button>
                     <button
                       type="button"

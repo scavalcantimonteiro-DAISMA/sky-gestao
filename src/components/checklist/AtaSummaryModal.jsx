@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { 
   FileText, Download, Mail, Copy, Check, X, Building2, MapPin, 
   Calendar, CheckCircle, Radio, Boxes, ShoppingCart, UserCheck, 
-  AlertCircle, ArrowRight
+  AlertCircle, ArrowRight, MessageSquare, PenTool
 } from 'lucide-react';
 import { generateAtaPDF } from '../../services/pdfGenerator';
-import { openOutlookEmailForAta, copyAtaToClipboard, formatDateBR } from '../../services/outlookService';
+import { openOutlookEmailForAta, openWhatsAppAta, copyAtaToClipboard, formatDateBR } from '../../services/outlookService';
 import { db } from '../../db';
 
 export default function AtaSummaryModal({ ata, onClose, onAtaSaved }) {
@@ -46,6 +46,10 @@ export default function AtaSummaryModal({ ata, onClose, onAtaSaved }) {
 
   const handleOpenOutlook = () => {
     openOutlookEmailForAta({ ...ata, todasPendencias: pendenciasConsolidadas });
+  };
+
+  const handleOpenWhatsApp = () => {
+    openWhatsAppAta({ ...ata, todasPendencias: pendenciasConsolidadas });
   };
 
   const handleSaveAta = async () => {
@@ -302,21 +306,32 @@ export default function AtaSummaryModal({ ata, onClose, onAtaSaved }) {
             <button
               type="button"
               onClick={handleDownloadPDF}
-              className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2"
+              className="flex-1 sm:flex-none px-3.5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-1.5"
             >
               <Download className="w-4 h-4" />
               Baixar PDF
+            </button>
+
+            {/* Botão Enviar no WhatsApp */}
+            <button
+              type="button"
+              onClick={handleOpenWhatsApp}
+              className="flex-1 sm:flex-none px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-1.5"
+              title="Compartilhar resumo da ata no WhatsApp"
+            >
+              <MessageSquare className="w-4 h-4" />
+              WhatsApp
             </button>
 
             {/* Botão Enviar por E-mail (Abrir Outlook) */}
             <button
               type="button"
               onClick={handleOpenOutlook}
-              className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2"
+              className="flex-1 sm:flex-none px-3.5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-1.5"
               title="Abre o aplicativo do Outlook com assunto e ata preenchidos no corpo"
             >
               <Mail className="w-4 h-4" />
-              Abrir no Outlook
+              Outlook
             </button>
           </div>
         </div>

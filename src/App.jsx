@@ -5,12 +5,14 @@ import HomeDashboard from './components/HomeDashboard';
 import ChecklistWizard from './components/checklist/ChecklistWizard';
 import AtaHistory from './components/checklist/AtaHistory';
 import GestaoDashboard from './components/gestao/GestaoDashboard';
+import BackupModal from './components/BackupModal';
 import { seedInitialDataIfNeeded } from './db';
 import { startReminderWatcher } from './services/notificationService';
 import { Shield, Smartphone } from 'lucide-react';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState('home');
+  const [isBackupOpen, setIsBackupOpen] = useState(false);
 
   useEffect(() => {
     // 1. Carrega dados iniciais do banco
@@ -35,7 +37,11 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-100/70 text-slate-800 flex flex-col font-sans">
       {/* Top Navbar */}
-      <Navbar currentTab={currentTab} setCurrentTab={setCurrentTab} />
+      <Navbar
+        currentTab={currentTab}
+        setCurrentTab={setCurrentTab}
+        onOpenBackup={() => setIsBackupOpen(true)}
+      />
 
       {/* Banner de Notificação & Teste Sonoro */}
       <NotificationBanner />
@@ -99,6 +105,12 @@ export default function App() {
           </div>
         </div>
       </footer>
+      {/* Modal de Backup e Exportação para Excel */}
+      <BackupModal
+        isOpen={isBackupOpen}
+        onClose={() => setIsBackupOpen(false)}
+        onDataRestored={() => window.location.reload()}
+      />
     </div>
   );
 }
