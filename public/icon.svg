@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#be123c"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#skyGrad)"/>
+  <!-- Clipboard / Checklist Shape -->
+  <rect x="116" y="110" width="280" height="320" rx="30" fill="#ffffff" fill-opacity="0.95"/>
+  <rect x="180" y="80" width="152" height="56" rx="20" fill="#0f172a"/>
+  <!-- Lines and Checkmarks -->
+  <circle cx="166" cy="190" r="16" fill="#e11d48"/>
+  <path d="M158 190l6 6 12-12" stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="200" y="182" width="150" height="16" rx="8" fill="#334155"/>
+  
+  <circle cx="166" cy="260" r="16" fill="#e11d48"/>
+  <path d="M158 260l6 6 12-12" stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="200" y="252" width="130" height="16" rx="8" fill="#334155"/>
+
+  <circle cx="166" cy="330" r="16" fill="#0284c7"/>
+  <path d="M166 322v16M158 330h16" stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <rect x="200" y="322" width="160" height="16" rx="8" fill="#334155"/>
+  
+  <!-- Text Label -->
+  <text x="256" y="400" font-family="system-ui, sans-serif" font-size="28" font-weight="900" text-anchor="middle" fill="#e11d48" letter-spacing="2">SKY GESTÃO</text>
+</svg>
