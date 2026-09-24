@@ -104,14 +104,22 @@ function isTodayInRoutineDays(routineDays = []) {
 export async function checkRoutineReminders() {
   const now = new Date();
   const currentMinutesFromMidnight = now.getHours() * 60 + now.getMinutes();
-  const todayStr = now.toISOString().split('T')[0];
+
+  // Data local brasileira (YYYY-MM-DD) sem distorção de UTC
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const todayStr = `${year}-${month}-${day}`;
 
   try {
-    const rotinas = await db.rotinas.where('ativo').equals(1).toArray();
+    // Busca todas as rotinas e filtra em memória (evita problema de tipo 1 vs true no IndexedDB/Dexie)
+    const todasRotinas = await db.rotinas.toArray();
     
-    for (const rotina of rotinas) {
-      if (!rotina.notificacaoAtiva) continue;
+    for (const rotina of todasRotinas) {
+      // Verifica se a rotina e notificações estão ativas
+      if (rotina.ativo === false || rotina.notificacaoAtiva === false) continue;
       if (!isTodayInRoutineDays(rotina.dias)) continue;
+      if (!rotina.horario || !rotina.horario.includes(':')) continue;
 
       // Parsing do horário "HH:MM"
       const [hStr, mStr] = rotina.horario.split(':');
@@ -120,24 +128,61 @@ export async function checkRoutineReminders() {
       const routineMinutesFromMidnight = routineHour * 60 + routineMinute;
 
       // Alerta deve tocar 20 minutos antes
-      const targetAlertMinute = routineMinutesFromMidnight - 20;
+      let targetAlertMinute = routineMinutesFromMidnight - 20;
+      if (targetAlertMinute < 0) {
+        targetAlertMinute += 1440; // 24 * 60 min
+      }
 
-      // Se a hora atual está no minuto exato do alerta e ainda não alertou hoje
-      if (
-        currentMinutesFromMidnight === targetAlertMinute &&
-        rotina.ultimoAlertaData !== todayStr
-      ) {
-        await showNativeNotification(`⏰ Lembrete SKY: ${rotina.titulo} em 20 min!`, {
-          body: `Sua rotina está programada para às ${rotina.horario}. ${rotina.descricao}`,
+      // Janela de tolerância: dispara se a hora atual estiver entre o horário de aviso (20 min antes)
+      // e o horário da rotina, e ainda não tiver alertado hoje.
+      // Isso é crucial no celular: se a tela estava bloqueada às 09:40 e o usuário acende a tela às 09:42,
+      // ele ainda receberá o aviso em vez de perder para sempre por checar igualdade estrita (===).
+      const isWithinAlertWindow =
+        currentMinutesFromMidnight >= targetAlertMinute &&
+        currentMinutesFromMidnight <= routineMinutesFromMidnight;
+
+      if (isWithinAlertWindow && rotina.ultimoAlertaData !== todayStr) {
+        const minutesLeft = routineMinutesFromMidnight - currentMinutesFromMidnight;
+        const msgTempo = minutesLeft > 0 ? `em ${minutesLeft} min` : 'agora';
+
+        await showNativeNotification(`⏰ Lembrete SKY: ${rotina.titulo} (${msgTempo})!`, {
+          body: `Sua rotina está programada para às ${rotina.horario}. ${rotina.descricao || ''}`,
           tag: `rotina-${rotina.id}-${todayStr}`
         });
 
-        // Marca como disparado hoje para não repetir no mesmo minuto
+        // Marca como disparado hoje para não repetir no mesmo dia
         await db.rotinas.update(rotina.id, { ultimoAlertaData: todayStr });
       }
     }
   } catch (err) {
     console.error('Erro ao verificar lembretes de rotinas:', err);
+  }
+}
+
+// Checa pendências com lembrete agendado (calendário ou prazo em horas)
+export async function checkPendenciasReminders() {
+  const now = new Date();
+  const currentTimestamp = now.getTime();
+
+  try {
+    const pendencias = await db.pendencias.toArray();
+    for (const p of pendencias) {
+      if (p.status !== 'pendente' || !p.lembreteEm) continue;
+      const lembreteTime = new Date(p.lembreteEm).getTime();
+
+      // Dispara se o horário do lembrete já chegou e ainda não foi alertado
+      if (currentTimestamp >= lembreteTime && !p.lembreteDisparado) {
+        await showNativeNotification(`⏰ Lembrete de Pendência: ${p.credenciado || 'Geral'}`, {
+          body: `[${p.setor}] ${p.descricao}`,
+          tag: `pendencia-${p.id}`
+        });
+
+        // Marca como disparado para não repetir
+        await db.pendencias.update(p.id, { lembreteDisparado: true });
+      }
+    }
+  } catch (err) {
+    console.error('Erro ao verificar lembretes de pendências:', err);
   }
 }
 
@@ -148,6 +193,10 @@ export function startReminderWatcher() {
   if (reminderInterval) return;
   // Checa imediatamente
   checkRoutineReminders();
+  checkPendenciasReminders();
   // Checa a cada 30 segundos
-  reminderInterval = setInterval(checkRoutineReminders, 30000);
+  reminderInterval = setInterval(() => {
+    checkRoutineReminders();
+    checkPendenciasReminders();
+  }, 30000);
 }

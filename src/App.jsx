@@ -6,6 +6,7 @@ import ChecklistWizard from './components/checklist/ChecklistWizard';
 import AtaHistory from './components/checklist/AtaHistory';
 import GestaoDashboard from './components/gestao/GestaoDashboard';
 import BackupModal from './components/BackupModal';
+import NtfyModal from './components/NtfyModal';
 import { seedInitialDataIfNeeded } from './db';
 import { startReminderWatcher } from './services/notificationService';
 import { Shield, Smartphone } from 'lucide-react';
@@ -13,6 +14,7 @@ import { Shield, Smartphone } from 'lucide-react';
 export default function App() {
   const [currentTab, setCurrentTab] = useState('home');
   const [isBackupOpen, setIsBackupOpen] = useState(false);
+  const [isNtfyOpen, setIsNtfyOpen] = useState(false);
 
   useEffect(() => {
     // 1. Carrega dados iniciais do banco
@@ -41,6 +43,7 @@ export default function App() {
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
         onOpenBackup={() => setIsBackupOpen(true)}
+        onOpenNtfy={() => setIsNtfyOpen(true)}
       />
 
       {/* Banner de Notificação & Teste Sonoro */}
@@ -110,6 +113,11 @@ export default function App() {
         isOpen={isBackupOpen}
         onClose={() => setIsBackupOpen(false)}
         onDataRestored={() => window.location.reload()}
+      />
+      {/* Modal de Configuração Push Celular ntfy */}
+      <NtfyModal
+        isOpen={isNtfyOpen}
+        onClose={() => setIsNtfyOpen(false)}
       />
     </div>
   );

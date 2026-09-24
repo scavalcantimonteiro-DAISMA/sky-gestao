@@ -1,7 +1,9 @@
 import React from 'react';
-import { Building2, MapPin, Calendar, UserCheck } from 'lucide-react';
+import { Building2, MapPin, Calendar, UserCheck, Users } from 'lucide-react';
 
 export default function StepCredenciado({ data, onChange }) {
+  const tipoVisita = data.tipoVisita || 'setores';
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       <div className="border-b border-slate-200 pb-4">
@@ -10,7 +12,7 @@ export default function StepCredenciado({ data, onChange }) {
           Identificação da Visita
         </h3>
         <p className="text-sm text-slate-500 mt-1">
-          Informe os dados básicos do credenciado para iniciar o checklist operacional.
+          Informe os dados básicos do credenciado e selecione o formato da reunião.
         </p>
       </div>
 
@@ -89,6 +91,67 @@ export default function StepCredenciado({ data, onChange }) {
               placeholder="Seu nome (Supervisor SKY)"
               className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-slate-900 bg-white shadow-sm font-medium text-base"
             />
+          </div>
+        </div>
+      </div>
+
+      {/* Seletor de Estrutura da Operação (NOVO REQUISITO: Modo Proprietário Único) */}
+      <div className="pt-4 border-t border-slate-200 space-y-2.5">
+        <label className="block text-sm font-bold text-slate-800">
+          Formato de Execução do Checklist
+        </label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          {/* Opção Tradicional */}
+          <div
+            onClick={() => onChange('tipoVisita', 'setores')}
+            className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-3 ${
+              tipoVisita === 'setores'
+                ? 'border-rose-600 bg-rose-50/50 shadow-sm'
+                : 'border-slate-200 hover:border-slate-300 bg-white'
+            }`}
+          >
+            <div className={`p-2.5 rounded-xl shrink-0 mt-0.5 ${
+              tipoVisita === 'setores' ? 'bg-rose-600 text-white' : 'bg-slate-100 text-slate-500'
+            }`}>
+              <Users className="w-5 h-5" />
+            </div>
+            <div>
+              <strong className="block text-sm font-bold text-slate-900">
+                Por Setores & Líderes
+              </strong>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                Reunião com encarregados de Torre, Estoque e Vendas separadamente, finalizando com o Proprietário.
+              </p>
+            </div>
+          </div>
+
+          {/* Opção Proprietário Único */}
+          <div
+            onClick={() => onChange('tipoVisita', 'proprietario_unico')}
+            className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-3 ${
+              tipoVisita === 'proprietario_unico'
+                ? 'border-rose-600 bg-rose-50/50 shadow-sm'
+                : 'border-slate-200 hover:border-slate-300 bg-white'
+            }`}
+          >
+            <div className={`p-2.5 rounded-xl shrink-0 mt-0.5 ${
+              tipoVisita === 'proprietario_unico' ? 'bg-rose-600 text-white' : 'bg-slate-100 text-slate-500'
+            }`}>
+              <UserCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <strong className="block text-sm font-bold text-slate-900">
+                  Proprietário Centralizado
+                </strong>
+                <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-rose-100 text-rose-700">
+                  RECOMENDADO
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                Para credenciados onde o proprietário coordena e responde por todas as áreas sozinho. Passa por todos os setores direto com ele.
+              </p>
+            </div>
           </div>
         </div>
       </div>

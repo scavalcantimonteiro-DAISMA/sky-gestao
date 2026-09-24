@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ClipboardList, Clock, Bell, Home, CheckCircle2, Menu, X, Smartphone, Database } from 'lucide-react';
 import { requestNotificationPermission, showNativeNotification } from '../services/notificationService';
 
-export default function Navbar({ currentTab, setCurrentTab, onOpenBackup }) {
+export default function Navbar({ currentTab, setCurrentTab, onOpenBackup, onOpenNtfy }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notifState, setNotifState] = useState(
     'Notification' in window ? Notification.permission : 'unsupported'
@@ -89,7 +89,17 @@ export default function Navbar({ currentTab, setCurrentTab, onOpenBackup }) {
             <span className="hidden lg:inline">Backup / Excel</span>
           </button>
 
-          {/* Botão de Notificação */}
+          {/* Botão de Push Celular ntfy */}
+          <button
+            onClick={onOpenNtfy}
+            title="Configurar Notificações Push no Celular (ntfy.sh)"
+            className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 border border-purple-500/30 transition flex items-center gap-1.5"
+          >
+            <Smartphone className="w-3.5 h-3.5 text-purple-400" />
+            <span>Push Celular</span>
+          </button>
+
+          {/* Botão de Notificação Local */}
           <button
             onClick={handleRequestNotif}
             title={notifState === 'granted' ? 'Notificações ativadas' : 'Ativar notificações'}
@@ -106,6 +116,14 @@ export default function Navbar({ currentTab, setCurrentTab, onOpenBackup }) {
 
         {/* Mobile Menu Button */}
         <div className="flex items-center gap-2 md:hidden">
+          <button
+            onClick={onOpenNtfy}
+            className="p-2 rounded-lg text-purple-300 hover:text-white bg-purple-950/60 border border-purple-800"
+            title="Push Celular ntfy"
+          >
+            <Smartphone className="w-4 h-4 text-purple-400" />
+          </button>
+
           <button
             onClick={onOpenBackup}
             className="p-2 rounded-lg text-slate-300 hover:text-white bg-slate-800 border border-slate-700"

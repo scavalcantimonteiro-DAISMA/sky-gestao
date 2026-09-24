@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { 
   CheckCircle2, Clock, AlertTriangle, Plus, Search, Filter, 
-  Trash2, Check, Calendar, Building2, Tag, ArrowUpDown, CalendarPlus
+  Trash2, Check, Calendar, Building2, Tag, ArrowUpDown, CalendarPlus,
+  Pencil, Bell, X, Sparkles, Send, BellRing
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { db } from '../../db';
 import { formatDateBR, downloadIcsFile } from '../../services/outlookService';
+import { schedulePendenciaReminderNtfy } from '../../services/ntfyService';
 
 export default function PendenciasList() {
   const [pendencias, setPendencias] = useState([]);
@@ -14,12 +16,21 @@ export default function PendenciasList() {
   const [sectorFilter, setSectorFilter] = useState('todos');
   const [searchTerm, setSearchTerm] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
 
   // Formulário de nova pendência
   const [newDescricao, setNewDescricao] = useState('');
   const [newCredenciado, setNewCredenciado] = useState('');
   const [newSetor, setNewSetor] = useState('Geral');
   const [newPrioridade, setNewPrioridade] = useState('alta');
+  const [newLembreteEm, setNewLembreteEm] = useState('');
+
+  // Formulário de edição
+  const [editDescricao, setEditDescricao] = useState('');
+  const [editCredenciado, setEditCredenciado] = useState('');
+  const [editSetor, setEditSetor] = useState('Geral');
+  const [editPrioridade, setEditPrioridade] = useState('alta');
+  const [editLembreteEm, setEditLembreteEm] = useState('');
 
   const loadPendencias = async () => {
     setLoading(true);
@@ -36,6 +47,37 @@ export default function PendenciasList() {
   useEffect(() => {
     loadPendencias();
   }, []);
+
+  // Helpers para cálculo de data/hora de lembrete
+  const getDatetimeWithOffset = (dateObj) => {
+    const offset = dateObj.getTimezoneOffset() * 60000;
+    return new Date(dateObj.getTime() - offset).toISOString().slice(0, 16);
+  };
+
+  const getPlusHours = (hours) => {
+    const d = new Date(Date.now() + hours * 60 * 60 * 1000);
+    return getDatetimeWithOffset(d);
+  };
+
+  const getPlusDaysAtHour = (days, targetHour = 9) => {
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    d.setHours(targetHour, 0, 0, 0);
+    return getDatetimeWithOffset(d);
+  };
+
+  const formatDateTimeBR = (isoStr) => {
+    if (!isoStr) return '';
+    try {
+      const [dPart, tPart] = isoStr.split('T');
+      if (!dPart) return '';
+      const [y, m, d] = dPart.split('-');
+      const time = tPart ? tPart.slice(0, 5) : '09:00';
+      return `${d}/${m} às ${time}`;
+    } catch (e) {
+      return isoStr;
+    }
+  };
 
   // Calcula quantos dias a pendência está na tela
   const getDaysOnScreen = (dataCriacao) => {
@@ -67,9 +109,7 @@ export default function PendenciasList() {
           spread: 60,
           origin: { y: 0.8 }
         });
-      } catch (e) {
-        // Confetti fallback
-      }
+      } catch (e) {}
     }
 
     loadPendencias();
@@ -83,12 +123,55 @@ export default function PendenciasList() {
     }
   };
 
+  const handleOpenEdit = (item, e) => {
+    e.stopPropagation();
+    setEditingItem(item);
+    setEditDescricao(item.descricao || '');
+    setEditCredenciado(item.credenciado || '');
+    setEditSetor(item.setor || 'Geral');
+    setEditPrioridade(item.prioridade || 'alta');
+    setEditLembreteEm(item.lembreteEm || '');
+  };
+
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    if (!editDescricao.trim() || !editingItem) return;
+
+    await db.pendencias.update(editingItem.id, {
+      descricao: editDescricao.trim(),
+      credenciado: editCredenciado.trim() || 'Geral',
+      setor: editSetor,
+      prioridade: editPrioridade,
+      lembreteEm: editLembreteEm || null,
+      lembreteDisparado: false
+    });
+
+    // Se adicionou lembrete futuro, agenda no ntfy
+    if (editLembreteEm) {
+      const delayMs = new Date(editLembreteEm).getTime() - Date.now();
+      if (delayMs > 0) {
+        const delayMin = Math.max(1, Math.round(delayMs / 60000));
+        schedulePendenciaReminderNtfy(
+          {
+            credenciado: editCredenciado.trim() || 'Geral',
+            setor: editSetor,
+            descricao: editDescricao.trim()
+          },
+          `${delayMin}m`
+        );
+      }
+    }
+
+    setEditingItem(null);
+    loadPendencias();
+  };
+
   const handleAddSubmit = async (e) => {
     e.preventDefault();
     if (!newDescricao.trim()) return;
 
     const todayStr = new Date().toISOString().split('T')[0];
-    await db.pendencias.add({
+    const newId = await db.pendencias.add({
       origem: 'manual',
       credenciado: newCredenciado.trim() || 'Geral',
       setor: newSetor,
@@ -96,24 +179,46 @@ export default function PendenciasList() {
       status: 'pendente',
       dataCriacao: todayStr,
       prioridade: newPrioridade,
+      lembreteEm: newLembreteEm || null,
+      lembreteDisparado: false,
       observacao: ''
     });
+
+    // Se programou lembrete, agenda no ntfy para o celular
+    if (newLembreteEm) {
+      const delayMs = new Date(newLembreteEm).getTime() - Date.now();
+      if (delayMs > 0) {
+        const delayMin = Math.max(1, Math.round(delayMs / 60000));
+        schedulePendenciaReminderNtfy(
+          {
+            credenciado: newCredenciado.trim() || 'Geral',
+            setor: newSetor,
+            descricao: newDescricao.trim()
+          },
+          `${delayMin}m`
+        );
+      }
+    }
 
     setNewDescricao('');
     setNewCredenciado('');
     setNewSetor('Geral');
     setNewPrioridade('alta');
+    setNewLembreteEm('');
     setIsAdding(false);
     loadPendencias();
   };
 
   const handleExportOutlook = (item) => {
-    const now = new Date();
-    const end = new Date(now.getTime() + 60 * 60 * 1000);
+    let start = new Date();
+    if (item.lembreteEm) {
+      start = new Date(item.lembreteEm);
+    }
+    const end = new Date(start.getTime() + 60 * 60 * 1000);
     downloadIcsFile(
       `[PENDÊNCIA SKY] ${item.credenciado} - ${item.setor}`,
-      `Pendência: ${item.descricao}\nPrioridade: ${item.prioridade.toUpperCase()}\nCriada em: ${formatDateBR(item.dataCriacao)}`,
-      now,
+      `Pendência: ${item.descricao}\nPrioridade: ${item.prioridade.toUpperCase()}\nCriada em: ${formatDateBR(item.dataCriacao)}${item.lembreteEm ? `\nLembrete agendado para: ${formatDateTimeBR(item.lembreteEm)}` : ''}`,
+      start,
       end
     );
   };
@@ -151,10 +256,10 @@ export default function PendenciasList() {
         <div>
           <h2 className="text-2xl font-black text-slate-900 flex items-center gap-2.5">
             <CheckCircle2 className="w-7 h-7 text-rose-600" />
-            Minhas Pendências
+            Minhas Pendências & Demandas
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            Controle de ações, prazos e tempo que cada pendência está em aberto na sua tela.
+            Edite, gerencie prazos e programe lembretes para <strong>daqui a 4 horas, amanhã ou no calendário</strong>.
           </p>
         </div>
 
@@ -174,7 +279,7 @@ export default function PendenciasList() {
           className="bg-slate-900 text-white p-6 rounded-3xl shadow-xl border border-slate-800 space-y-4 animate-in slide-in-from-top-3"
         >
           <h3 className="font-bold text-base text-rose-400 flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Cadastrar Nova Pendência
+            <Plus className="w-4 h-4" /> Cadastrar Nova Pendência / Demanda
           </h3>
 
           <div className="space-y-1.5">
@@ -231,14 +336,71 @@ export default function PendenciasList() {
                 onChange={(e) => setNewPrioridade(e.target.value)}
                 className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:ring-2 focus:ring-rose-500"
               >
-                <option value="alta">Alta (Urgente)</option>
+                <option value="alta">Alta (Crítica)</option>
                 <option value="media">Média</option>
                 <option value="baixa">Baixa</option>
               </select>
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2">
+          {/* Seção de Lembrete Rápido & Calendário */}
+          <div className="pt-2 border-t border-slate-800 space-y-2">
+            <label className="block text-xs font-bold text-rose-300 flex items-center gap-1.5">
+              <Bell className="w-3.5 h-3.5" />
+              Programar Lembrete / Alarme para esta Demanda
+            </label>
+
+            {/* Botões de Acesso Rápido */}
+            <div className="flex flex-wrap items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setNewLembreteEm(getPlusHours(4))}
+                className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold border border-slate-700 transition"
+              >
+                ⏱️ Daqui a 4 Horas
+              </button>
+              <button
+                type="button"
+                onClick={() => setNewLembreteEm(getPlusDaysAtHour(1, 9))}
+                className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold border border-slate-700 transition"
+              >
+                📅 Amanhã às 09:00
+              </button>
+              <button
+                type="button"
+                onClick={() => setNewLembreteEm(getPlusDaysAtHour(2, 9))}
+                className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold border border-slate-700 transition"
+              >
+                🗓️ Daqui a 2 Dias
+              </button>
+              {newLembreteEm && (
+                <button
+                  type="button"
+                  onClick={() => setNewLembreteEm('')}
+                  className="px-2 py-1 rounded-lg bg-rose-950/60 text-rose-300 text-xs font-semibold border border-rose-900 transition"
+                >
+                  ✕ Limpar
+                </button>
+              )}
+            </div>
+
+            {/* Input DateTime Personalizado */}
+            <div className="flex items-center gap-2">
+              <input
+                type="datetime-local"
+                value={newLembreteEm}
+                onChange={(e) => setNewLembreteEm(e.target.value)}
+                className="px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs font-medium focus:ring-2 focus:ring-rose-500"
+              />
+              {newLembreteEm && (
+                <span className="text-xs text-rose-400 font-semibold">
+                  Alarme tocará em: {formatDateTimeBR(newLembreteEm)}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
             <button
               type="button"
               onClick={() => setIsAdding(false)}
@@ -256,6 +418,163 @@ export default function PendenciasList() {
         </form>
       )}
 
+      {/* Modal de Edição de Pendência Existente */}
+      {editingItem && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm p-4 flex items-center justify-center animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden space-y-5 p-6">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-rose-50 text-rose-600">
+                  <Pencil className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">Editar Pendência</h3>
+                  <p className="text-xs text-slate-500">Altere o texto, setor, prioridade ou lembrete</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setEditingItem(null)}
+                className="text-slate-400 hover:text-slate-700 p-1 rounded-xl"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="space-y-4 text-slate-800 text-sm">
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-slate-700">
+                  Descrição da Ação / Pendência <span className="text-rose-600">*</span>
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={editDescricao}
+                  onChange={(e) => setEditDescricao(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-rose-500 text-sm"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Credenciado
+                  </label>
+                  <input
+                    type="text"
+                    value={editCredenciado}
+                    onChange={(e) => setEditCredenciado(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-rose-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Setor
+                  </label>
+                  <select
+                    value={editSetor}
+                    onChange={(e) => setEditSetor(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-rose-500"
+                  >
+                    <option value="Geral">Geral / Supervisão</option>
+                    <option value="Torre de Controle">Torre de Controle</option>
+                    <option value="Estoque">Estoque</option>
+                    <option value="Vendas">Vendas</option>
+                    <option value="Proprietário">Proprietário</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Prioridade
+                  </label>
+                  <select
+                    value={editPrioridade}
+                    onChange={(e) => setEditPrioridade(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-rose-500"
+                  >
+                    <option value="alta">Alta (Crítica)</option>
+                    <option value="media">Média</option>
+                    <option value="baixa">Baixa</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Lembrete na Edição */}
+              <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                  <Bell className="w-3.5 h-3.5 text-rose-600" />
+                  Data e Horário do Lembrete
+                </label>
+
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setEditLembreteEm(getPlusHours(4))}
+                    className="px-2 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200 transition"
+                  >
+                    ⏱️ +4 Horas
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditLembreteEm(getPlusDaysAtHour(1, 9))}
+                    className="px-2 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200 transition"
+                  >
+                    📅 Amanhã 09:00
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditLembreteEm(getPlusDaysAtHour(2, 9))}
+                    className="px-2 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200 transition"
+                  >
+                    🗓️ Daqui a 2 Dias
+                  </button>
+                  {editLembreteEm && (
+                    <button
+                      type="button"
+                      onClick={() => setEditLembreteEm('')}
+                      className="px-2 py-1 rounded-lg bg-rose-100 text-rose-700 text-xs font-semibold border border-rose-200 transition"
+                    >
+                      Remover Lembrete
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="datetime-local"
+                    value={editLembreteEm}
+                    onChange={(e) => setEditLembreteEm(e.target.value)}
+                    className="px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-xs font-medium focus:ring-2 focus:ring-rose-500"
+                  />
+                  {editLembreteEm && (
+                    <span className="text-xs text-rose-700 font-bold">
+                      Programado: {formatDateTimeBR(editLembreteEm)}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setEditingItem(null)}
+                  className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 text-xs font-semibold transition"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-rose-600 hover:bg-rose-700 text-white font-bold px-5 py-2 rounded-xl shadow text-xs transition"
+                >
+                  Salvar Alterações
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Barra de Filtros e Busca */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
         {/* Campo de Busca */}
@@ -267,7 +586,7 @@ export default function PendenciasList() {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar pendência..."
+            placeholder="Buscar por nome, setor ou descrição..."
             className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm focus:ring-2 focus:ring-rose-500"
           />
         </div>
@@ -363,7 +682,7 @@ export default function PendenciasList() {
 
                   <div className="space-y-1.5 flex-1">
                     <p
-                      className={`text-sm sm:text-base font-semibold text-slate-900 ${
+                      className={`text-sm sm:text-base font-semibold text-slate-900 leading-snug ${
                         !isPendente ? 'line-through text-slate-400' : ''
                       }`}
                     >
@@ -382,16 +701,35 @@ export default function PendenciasList() {
                         {item.setor}
                       </span>
 
+                      {/* Prioridade */}
+                      <span className={`px-2 py-0.5 rounded-md font-bold text-[10px] uppercase ${
+                        item.prioridade === 'alta'
+                          ? 'bg-rose-100 text-rose-700 border border-rose-200'
+                          : item.prioridade === 'media'
+                          ? 'bg-amber-100 text-amber-700 border border-amber-200'
+                          : 'bg-slate-100 text-slate-600'
+                      }`}>
+                        {item.prioridade || 'Média'}
+                      </span>
+
                       {/* Data de Criação */}
                       <span className="flex items-center gap-1 text-slate-400">
                         <Calendar className="w-3 h-3" />
                         {formatDateBR(item.dataCriacao)}
                       </span>
+
+                      {/* Lembrete Agendado Badge */}
+                      {item.lembreteEm && isPendente && (
+                        <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-1">
+                          <BellRing className="w-3 h-3 text-purple-600 animate-pulse" />
+                          Lembrar: {formatDateTimeBR(item.lembreteEm)}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
 
-                {/* Lado Direito: Contador de Dias & Botão de Status */}
+                {/* Lado Direito: Contador de Dias & Ações */}
                 <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
                   {/* Badge: Há quantos dias está na tela */}
                   {isPendente ? (
@@ -421,6 +759,16 @@ export default function PendenciasList() {
                       }`}
                     >
                       {isPendente ? 'Concluir' : 'Reabrir'}
+                    </button>
+
+                    {/* Botão de Editar */}
+                    <button
+                      type="button"
+                      onClick={(e) => handleOpenEdit(item, e)}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                      title="Editar pendência e lembrete"
+                    >
+                      <Pencil className="w-4 h-4" />
                     </button>
 
                     {/* Adicionar ao Outlook Calendar */}

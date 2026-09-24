@@ -29,6 +29,7 @@ Credenciado: ${ata.credenciado}
 Cidade: ${ata.cidade}
 Data da Visita: ${dataFormatada}
 Supervisor de Campo: ${ata.supervisor || 'Supervisor SKY'}
+Formato: ${ata.tipoVisita === 'proprietario_unico' ? 'Proprietário Centralizado (Gestão Única)' : 'Por Líderes de Setores'}
 =============================================================
 
 1. TORRE DE CONTROLE
@@ -163,6 +164,7 @@ export function formatAtaWhatsAppMessage(ata) {
 📍 *Cidade:* ${ata.cidade}
 📅 *Data:* ${dataFormatada}
 👤 *Supervisor:* ${ata.supervisor || 'Supervisor SKY'}
+👔 *Formato:* ${ata.tipoVisita === 'proprietario_unico' ? 'Proprietário Centralizado' : 'Líderes de Setores'}
 ━━━━━━━━━━━━━━━━━━━━
 
 📡 *1. TORRE DE CONTROLE*

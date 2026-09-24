@@ -27,6 +27,7 @@ export default function ChecklistWizard({ onCompleteChecklist }) {
     cidade: '',
     dataVisita: new Date().toISOString().split('T')[0],
     supervisor: '',
+    tipoVisita: 'setores', // 'setores' | 'proprietario_unico'
     torreControle: {
       osAtCaixa: 0,
       osPpCaixa: 0,
@@ -219,6 +220,23 @@ export default function ChecklistWizard({ onCompleteChecklist }) {
 
       {/* Container Principal do Passo Atual */}
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm">
+        {formData.tipoVisita === 'proprietario_unico' && currentStep > 1 && (
+          <div className="mb-6 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-between text-xs text-amber-900 shadow-sm animate-in fade-in">
+            <div className="flex items-center gap-2.5">
+              <div className="p-1.5 bg-amber-500/20 text-amber-800 rounded-lg">
+                <UserCheck className="w-4 h-4" />
+              </div>
+              <div>
+                <strong className="block text-amber-900 font-bold">Modo Proprietário Centralizado</strong>
+                <span className="text-amber-700">Avaliando este setor diretamente com o proprietário responsável por toda a empresa.</span>
+              </div>
+            </div>
+            <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-200 text-amber-900 uppercase">
+              Gestão Única
+            </span>
+          </div>
+        )}
+
         {currentStep === 1 && (
           <StepCredenciado data={formData} onChange={handleFieldChange} />
         )}
