@@ -28,32 +28,36 @@ export async function sendNtfyNotification({
   title = '⏰ SKY Gestão',
   message,
   priority = 'high',
-  tags = ['alarm_clock', 'sky'],
+  tags = ['alarm_clock', 'bell'],
   delay = null,
   clickUrl = null
 }) {
   const topic = getNtfyTopic();
   if (!topic) return false;
 
-  const headers = {
-    'Title': title,
-    'Priority': priority,
-    'Tags': tags.join(',')
+  const payload = {
+    topic,
+    title,
+    message,
+    priority: priority === 'urgent' ? 5 : priority === 'high' ? 4 : 3,
+    tags
   };
 
   if (delay) {
-    headers['Delay'] = String(delay);
+    payload.delay = String(delay);
   }
 
   if (clickUrl) {
-    headers['Click'] = clickUrl;
+    payload.click = clickUrl;
   }
 
   try {
-    const response = await fetch(`https://ntfy.sh/${topic}`, {
+    const response = await fetch('https://ntfy.sh', {
       method: 'POST',
-      body: message,
-      headers
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
     });
     return response.ok;
   } catch (err) {
