@@ -9,6 +9,7 @@ import { db } from '../../db';
 import { formatDateBR, downloadIcsFile } from '../../services/outlookService';
 import { schedulePendenciaReminderNtfy, sendNtfyNotification } from '../../services/ntfyService';
 import { getLocalTodayStr } from '../../services/notificationService';
+import { syncToCloudNow } from '../../services/cloudSyncService';
 
 export default function PendenciasList() {
   const [pendencias, setPendencias] = useState([]);
@@ -47,6 +48,9 @@ export default function PendenciasList() {
 
   useEffect(() => {
     loadPendencias();
+    const handleRemoteSync = () => loadPendencias();
+    window.addEventListener('sky-db-synced', handleRemoteSync);
+    return () => window.removeEventListener('sky-db-synced', handleRemoteSync);
   }, []);
 
   // Helpers para cálculo de data/hora de lembrete
@@ -103,6 +107,8 @@ export default function PendenciasList() {
       dataExecucao: nextStatus === 'executado' ? todayStr : null
     });
 
+    await syncToCloudNow(nextStatus === 'executado' ? 'Concluiu pendência' : 'Reabriu pendência');
+
     if (nextStatus === 'executado') {
       try {
         confetti({
@@ -127,6 +133,7 @@ export default function PendenciasList() {
     e.stopPropagation();
     if (window.confirm('Excluir esta pendência?')) {
       await db.pendencias.delete(id);
+      await syncToCloudNow('Excluiu pendência');
       loadPendencias();
     }
   };
@@ -153,6 +160,8 @@ export default function PendenciasList() {
       lembreteEm: editLembreteEm || null,
       lembreteDisparado: false
     });
+
+    await syncToCloudNow('Editou pendência');
 
     // Se adicionou lembrete futuro, agenda no ntfy
     if (editLembreteEm) {
@@ -193,6 +202,8 @@ export default function PendenciasList() {
       lembreteDisparado: false,
       observacao: ''
     });
+
+    await syncToCloudNow('Criou pendência');
 
     // Notifica imediatamente no ntfy sobre a nova pendência registrada
     sendNtfyNotification({

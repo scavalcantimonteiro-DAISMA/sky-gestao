@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Clock, Bell, Plus, Trash2, Calendar, Check, Volume2, 
-  Sparkles, CalendarPlus, Power, AlertCircle 
+  Sparkles, CalendarPlus, Power, AlertCircle, Pencil
 } from 'lucide-react';
 import { db } from '../../db';
 import { showNativeNotification, syncAllRoutinesWithNtfy } from '../../services/notificationService';
 import { scheduleRoutineOnNtfyServer, sendNtfyNotification } from '../../services/ntfyService';
 import { downloadIcsFile } from '../../services/outlookService';
+import { syncToCloudNow } from '../../services/cloudSyncService';
 
 const DIAS_SEMANA = [
   { id: 1, label: 'Seg', full: 'Segunda-feira' },
@@ -22,6 +23,7 @@ export default function RotinasDiarias() {
   const [rotinas, setRotinas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
+  const [editingRotinaId, setEditingRotinaId] = useState(null);
 
   // Form states
   const [titulo, setTitulo] = useState('');
@@ -34,9 +36,7 @@ export default function RotinasDiarias() {
     try {
       const items = await db.rotinas.toArray();
       setRotinas(items);
-      if (items.length === 0) {
-        setIsAdding(true);
-      } else {
+      if (items.length > 0) {
         syncAllRoutinesWithNtfy();
       }
     } catch (err) {
@@ -48,11 +48,34 @@ export default function RotinasDiarias() {
 
   useEffect(() => {
     loadRotinas();
+    const handleRemoteSync = () => loadRotinas();
+    window.addEventListener('sky-db-synced', handleRemoteSync);
+    return () => window.removeEventListener('sky-db-synced', handleRemoteSync);
   }, []);
+
+  const resetForm = () => {
+    setTitulo('');
+    setDescricao('');
+    setHorario('09:00');
+    setSelectedDias([1, 2, 3, 4, 5]);
+    setEditingRotinaId(null);
+    setIsAdding(false);
+  };
+
+  const handleOpenEdit = (rotina) => {
+    setEditingRotinaId(rotina.id);
+    setTitulo(rotina.titulo || '');
+    setDescricao(rotina.descricao || '');
+    setHorario(rotina.horario || '09:00');
+    setSelectedDias(Array.isArray(rotina.dias) && rotina.dias.length > 0 ? rotina.dias : [1, 2, 3, 4, 5]);
+    setIsAdding(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleClearAll = async () => {
     if (window.confirm('Tem certeza que deseja apagar todas as rotinas para cadastrar as suas?')) {
       await db.rotinas.clear();
+      await syncToCloudNow('Limpou todas as rotinas');
       setIsAdding(true);
       loadRotinas();
     }
@@ -88,22 +111,20 @@ export default function RotinasDiarias() {
     await db.rotinas.update(rotina.id, {
       ativo: nextAtivo
     });
+    await syncToCloudNow(nextAtivo ? 'Ativou rotina' : 'Desativou rotina');
     if (nextAtivo) {
       await scheduleRoutineOnNtfyServer({ ...rotina, ativo: true });
     }
     loadRotinas();
   };
 
-  const handleToggleNotif = async (rotina) => {
-    await db.rotinas.update(rotina.id, {
-      notificacaoAtiva: !rotina.notificacaoAtiva
-    });
-    loadRotinas();
-  };
-
   const handleDelete = async (id) => {
     if (window.confirm('Excluir esta rotina?')) {
       await db.rotinas.delete(id);
+      await syncToCloudNow('Excluiu rotina');
+      if (editingRotinaId === id) {
+        resetForm();
+      }
       loadRotinas();
     }
   };
@@ -133,6 +154,42 @@ export default function RotinasDiarias() {
     e.preventDefault();
     if (!titulo.trim() || !horario) return;
 
+    if (editingRotinaId !== null) {
+      // Atualiza rotina existente
+      const updatedFields = {
+        titulo: titulo.trim(),
+        descricao: descricao.trim(),
+        horario,
+        dias: selectedDias,
+        ultimoAlertaData: '',
+        ultimoAlertaExatoData: ''
+      };
+
+      await db.rotinas.update(editingRotinaId, updatedFields);
+      await syncToCloudNow('Editou rotina');
+
+      const updatedRotina = {
+        id: editingRotinaId,
+        ...updatedFields,
+        ativo: true,
+        notificacaoAtiva: true
+      };
+
+      await scheduleRoutineOnNtfyServer(updatedRotina, new Date());
+      await syncAllRoutinesWithNtfy();
+
+      sendNtfyNotification({
+        title: `✏️ Rotina Atualizada: ${updatedRotina.titulo} (${updatedRotina.horario})`,
+        message: `Novo horário configurado: aviso às ${getAlertTime(updatedRotina.horario)} (20 min antes) e às ${updatedRotina.horario} (hora exata).${updatedRotina.descricao ? `\n📋 ${updatedRotina.descricao}` : ''}`,
+        priority: 'high',
+        tags: ['calendar', 'pencil2']
+      });
+
+      resetForm();
+      loadRotinas();
+      return;
+    }
+
     const newRotinaData = {
       titulo: titulo.trim(),
       descricao: descricao.trim(),
@@ -147,6 +204,8 @@ export default function RotinasDiarias() {
     const newId = await db.rotinas.add(newRotinaData);
     const savedRotina = { ...newRotinaData, id: newId };
 
+    await syncToCloudNow('Criou rotina');
+
     // Agenda imediatamente no servidor ntfy para hoje e amanhã
     await scheduleRoutineOnNtfyServer(savedRotina, new Date());
     await syncAllRoutinesWithNtfy();
@@ -159,11 +218,7 @@ export default function RotinasDiarias() {
       tags: ['calendar', 'bell']
     });
 
-    setTitulo('');
-    setDescricao('');
-    setHorario('09:00');
-    setSelectedDias([1, 2, 3, 4, 5]);
-    setIsAdding(false);
+    resetForm();
     loadRotinas();
   };
 
@@ -177,7 +232,7 @@ export default function RotinasDiarias() {
             Rotinas Diárias & Lembretes
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            Cadastre suas rotinas (Segunda a Sexta) e receba alertas sonoros no celular <strong>20 minutos antes</strong>.
+            Cadastre ou edite suas rotinas e receba alertas no celular <strong>20 minutos antes e na hora exata</strong>.
           </p>
         </div>
 
@@ -194,7 +249,13 @@ export default function RotinasDiarias() {
           )}
 
           <button
-            onClick={() => setIsAdding(!isAdding)}
+            onClick={() => {
+              if (isAdding) {
+                resetForm();
+              } else {
+                setIsAdding(true);
+              }
+            }}
             className="bg-rose-600 hover:bg-rose-700 text-white font-bold px-4 py-2.5 rounded-xl shadow transition flex items-center gap-2 text-sm"
           >
             <Plus className="w-5 h-5" />
@@ -203,14 +264,15 @@ export default function RotinasDiarias() {
         </div>
       </div>
 
-      {/* Formulário de Nova Rotina */}
+      {/* Formulário de Nova / Edição de Rotina */}
       {isAdding && (
         <form
           onSubmit={handleAddSubmit}
           className="bg-slate-900 text-white p-6 rounded-3xl shadow-xl border border-slate-800 space-y-5 animate-in slide-in-from-top-3"
         >
           <h3 className="font-bold text-base text-rose-400 flex items-center gap-2">
-            <Sparkles className="w-4 h-4" /> Cadastrar Rotina de Supervisão
+            <Sparkles className="w-4 h-4" />
+            {editingRotinaId !== null ? 'Editar Rotina de Supervisão' : 'Cadastrar Rotina de Supervisão'}
           </h3>
 
           <div className="space-y-1.5">
@@ -255,7 +317,7 @@ export default function RotinasDiarias() {
               />
               <p className="text-xs text-rose-400 mt-1.5 flex items-center gap-1 font-medium">
                 <Bell className="w-3.5 h-3.5" />
-                Alerta tocará às <strong>{getAlertTime(horario)}</strong> (20 min antes no celular)
+                Alerta tocará às <strong>{getAlertTime(horario)}</strong> (20 min antes) e às <strong>{horario}</strong>
               </p>
             </div>
 
@@ -300,7 +362,7 @@ export default function RotinasDiarias() {
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
             <button
               type="button"
-              onClick={() => setIsAdding(false)}
+              onClick={resetForm}
               className="px-4 py-2 rounded-xl text-slate-400 hover:text-white text-sm"
             >
               Cancelar
@@ -309,7 +371,7 @@ export default function RotinasDiarias() {
               type="submit"
               className="bg-rose-600 hover:bg-rose-700 text-white font-bold px-5 py-2 rounded-xl shadow text-sm"
             >
-              Salvar Rotina
+              {editingRotinaId !== null ? 'Salvar Alterações' : 'Salvar Rotina'}
             </button>
           </div>
         </form>
@@ -409,6 +471,16 @@ export default function RotinasDiarias() {
                   </button>
 
                   <div className="flex items-center gap-1.5">
+                    {/* Editar Rotina */}
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEdit(rotina)}
+                      className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 transition"
+                      title="Editar rotina"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+
                     {/* Exportar Outlook */}
                     <button
                       type="button"

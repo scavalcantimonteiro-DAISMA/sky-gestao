@@ -14,6 +14,7 @@ import {
   triggerEveningSummaryNow
 } from '../../services/notificationService';
 import { sendNtfyNotification } from '../../services/ntfyService';
+import { syncToCloudNow } from '../../services/cloudSyncService';
 
 export default function GestaoDashboard({ initialSubTab = 'dashboard' }) {
   const [activeSubTab, setActiveSubTab] = useState(initialSubTab);
@@ -40,6 +41,9 @@ export default function GestaoDashboard({ initialSubTab = 'dashboard' }) {
 
   useEffect(() => {
     loadData();
+    const handleRemoteSync = () => loadData();
+    window.addEventListener('sky-db-synced', handleRemoteSync);
+    return () => window.removeEventListener('sky-db-synced', handleRemoteSync);
   }, [activeSubTab]);
 
   const getDaysOnScreen = (dataCriacao) => {
@@ -72,6 +76,7 @@ export default function GestaoDashboard({ initialSubTab = 'dashboard' }) {
       status: 'executado',
       dataExecucao: todayStr
     });
+    await syncToCloudNow('Concluiu pendência');
     sendNtfyNotification({
       title: `✅ Pendência Concluída: ${pItem.credenciado || 'Geral'}`,
       message: `[${pItem.setor || 'Geral'}] ${pItem.descricao}`,

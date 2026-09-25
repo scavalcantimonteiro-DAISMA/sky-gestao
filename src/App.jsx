@@ -9,6 +9,7 @@ import BackupModal from './components/BackupModal';
 import NtfyModal from './components/NtfyModal';
 import { seedInitialDataIfNeeded } from './db';
 import { startReminderWatcher } from './services/notificationService';
+import { startRealtimeCloudSync } from './services/cloudSyncService';
 import { Shield, Smartphone } from 'lucide-react';
 
 export default function App() {
@@ -20,15 +21,23 @@ export default function App() {
     // 1. Carrega dados iniciais do banco
     seedInitialDataIfNeeded();
 
-    // 2. Inicia o monitor de lembretes (20 min antes)
+    // 2. Inicia sincronização em tempo real entre Site (PC) e App (Celular)
+    startRealtimeCloudSync();
+
+    // 3. Inicia o monitor de lembretes (20 min antes + 08h + 18h)
     startReminderWatcher();
 
-    // 3. Registra o Service Worker para PWA e notificações móveis
+    // 4. Registra e atualiza o Service Worker para PWA e notificações móveis
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker
         .register('/sw.js')
         .then((reg) => {
-          console.log('Service Worker SKY registrado:', reg.scope);
+          reg.update().catch(() => {});
+          document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+              reg.update().catch(() => {});
+            }
+          });
         })
         .catch((err) => {
           console.warn('Erro ao registrar Service Worker:', err);

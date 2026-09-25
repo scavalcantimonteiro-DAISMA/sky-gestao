@@ -53,6 +53,9 @@ export default function HomeDashboard({ onSelectTab }) {
     }
 
     loadStats();
+    const handleRemoteSync = () => loadStats();
+    window.addEventListener('sky-db-synced', handleRemoteSync);
+    return () => window.removeEventListener('sky-db-synced', handleRemoteSync);
   }, []);
 
   return (

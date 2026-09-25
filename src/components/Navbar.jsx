@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ClipboardList, Clock, Bell, Home, CheckCircle2, Menu, X, Smartphone, Database } from 'lucide-react';
+import { ClipboardList, Clock, Bell, Home, CheckCircle2, Menu, X, Smartphone, Database, RefreshCw, CloudCheck } from 'lucide-react';
 import {
   requestNotificationPermission,
   showNativeNotification,
@@ -7,9 +7,11 @@ import {
   setNotificationBannerAcknowledged,
   syncAllRoutinesWithNtfy
 } from '../services/notificationService';
+import { syncToCloudNow, pullFromCloudNow, isDesktopDevice } from '../services/cloudSyncService';
 
 export default function Navbar({ currentTab, setCurrentTab, onOpenBackup, onOpenNtfy }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [syncStatus, setSyncStatus] = useState('synced'); // 'synced' | 'syncing' | 'error'
   const [notifActive, setNotifActive] = useState(() => {
     const nativeGranted = 'Notification' in window && Notification.permission === 'granted';
     return nativeGranted || isNotificationBannerAcknowledged();
@@ -20,9 +22,33 @@ export default function Navbar({ currentTab, setCurrentTab, onOpenBackup, onOpen
       const nativeGranted = 'Notification' in window && Notification.permission === 'granted';
       setNotifActive(nativeGranted || isNotificationBannerAcknowledged());
     };
+    const handleSyncStatus = (e) => {
+      if (e.detail?.status) {
+        setSyncStatus(e.detail.status);
+      }
+    };
     window.addEventListener('sky-notif-status-changed', updateStatus);
-    return () => window.removeEventListener('sky-notif-status-changed', updateStatus);
+    window.addEventListener('sky-sync-status', handleSyncStatus);
+    return () => {
+      window.removeEventListener('sky-notif-status-changed', updateStatus);
+      window.removeEventListener('sky-sync-status', handleSyncStatus);
+    };
   }, []);
+
+  const handleManualSync = async () => {
+    setSyncStatus('syncing');
+    if (isDesktopDevice()) {
+      // No computador (Site), envia a base limpa e editada do computador para o celular
+      await syncToCloudNow('Sincronização pelo Site', true);
+    } else {
+      // No celular (App), puxa imediatamente a base atualizada da nuvem
+      const pulled = await pullFromCloudNow(true);
+      if (!pulled) {
+        await syncToCloudNow('Sincronização pelo Celular', true);
+      }
+    }
+    setSyncStatus('synced');
+  };
 
   const handleRequestNotif = async () => {
     await requestNotificationPermission();
@@ -98,6 +124,16 @@ export default function Navbar({ currentTab, setCurrentTab, onOpenBackup, onOpen
             Gestão do Dia & Lembretes
           </button>
 
+          {/* Botão Sincronizar Nuvem (Site <-> App Celular) */}
+          <button
+            onClick={handleManualSync}
+            title="Sincronizar imediatamente entre o Site (PC) e o App no Celular"
+            className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-sky-500/10 text-sky-300 hover:bg-sky-500/20 border border-sky-500/30 transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-sky-400 ${syncStatus === 'syncing' ? 'animate-spin' : ''}`} />
+            <span>{syncStatus === 'syncing' ? 'Sincronizando...' : 'Sincronizado'}</span>
+          </button>
+
           {/* Botão de Backup / Exportar Excel */}
           <button
             onClick={onOpenBackup}
@@ -134,7 +170,15 @@ export default function Navbar({ currentTab, setCurrentTab, onOpenBackup, onOpen
         </nav>
 
         {/* Mobile Menu Button */}
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="flex items-center gap-1.5 md:hidden">
+          <button
+            onClick={handleManualSync}
+            className="p-2 rounded-lg text-sky-300 hover:text-white bg-sky-950/60 border border-sky-800"
+            title="Sincronizar Agora com o Site"
+          >
+            <RefreshCw className={`w-4 h-4 text-sky-400 ${syncStatus === 'syncing' ? 'animate-spin' : ''}`} />
+          </button>
+
           <button
             onClick={onOpenNtfy}
             className="p-2 rounded-lg text-purple-300 hover:text-white bg-purple-950/60 border border-purple-800"

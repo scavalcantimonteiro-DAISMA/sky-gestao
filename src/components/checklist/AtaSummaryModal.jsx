@@ -8,6 +8,7 @@ import { generateAtaPDF } from '../../services/pdfGenerator';
 import { openOutlookEmailForAta, openWhatsAppAta, copyAtaToClipboard, formatDateBR } from '../../services/outlookService';
 import { getLocalTodayStr } from '../../services/notificationService';
 import { sendNtfyNotification } from '../../services/ntfyService';
+import { syncToCloudNow } from '../../services/cloudSyncService';
 import { db } from '../../db';
 
 export default function AtaSummaryModal({ ata, onClose, onAtaSaved }) {
@@ -88,6 +89,8 @@ export default function AtaSummaryModal({ ata, onClose, onAtaSaved }) {
           tags: ['clipboard', 'bell']
         });
       }
+
+      await syncToCloudNow('Salvou Ata de Visita', true);
 
       setSavedSuccess(true);
       if (onAtaSaved) {

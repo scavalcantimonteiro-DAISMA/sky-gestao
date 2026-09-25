@@ -6,6 +6,7 @@ import {
 import { db } from '../../db';
 import { generateAtaPDF } from '../../services/pdfGenerator';
 import { openOutlookEmailForAta, openWhatsAppAta, formatDateBR } from '../../services/outlookService';
+import { syncToCloudNow } from '../../services/cloudSyncService';
 import AtaSummaryModal from './AtaSummaryModal';
 
 export default function AtaHistory({ onNewChecklist }) {
@@ -30,12 +31,16 @@ export default function AtaHistory({ onNewChecklist }) {
 
   useEffect(() => {
     loadAtas();
+    const handleRemoteSync = () => loadAtas();
+    window.addEventListener('sky-db-synced', handleRemoteSync);
+    return () => window.removeEventListener('sky-db-synced', handleRemoteSync);
   }, []);
 
   const handleDelete = async (id, e) => {
     e.stopPropagation();
-    if (window.confirm('Tem certeza que deseja remover esta Ata do histórico local?')) {
+    if (window.confirm('Tem certeza que deseja remover esta Ata do histórico?')) {
       await db.atas.delete(id);
+      await syncToCloudNow('Excluiu Ata', true);
       loadAtas();
     }
   };

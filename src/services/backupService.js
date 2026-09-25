@@ -1,5 +1,6 @@
 import { db } from '../db';
 import { formatDateBR } from './outlookService';
+import { syncToCloudNow } from './cloudSyncService';
 
 // Função auxiliar para download de arquivo no navegador
 function downloadBlob(content, filename, contentType) {
@@ -61,6 +62,8 @@ export async function importBackupJSON(file) {
         if (atas.length > 0) await db.atas.bulkAdd(atas);
         if (pendencias.length > 0) await db.pendencias.bulkAdd(pendencias);
         if (rotinas.length > 0) await db.rotinas.bulkAdd(rotinas);
+
+        await syncToCloudNow('Restaurou Backup', true);
 
         resolve({
           atasCount: atas.length,
