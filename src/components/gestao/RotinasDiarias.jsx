@@ -4,7 +4,8 @@ import {
   Sparkles, CalendarPlus, Power, AlertCircle 
 } from 'lucide-react';
 import { db } from '../../db';
-import { showNativeNotification } from '../../services/notificationService';
+import { showNativeNotification, syncAllRoutinesWithNtfy } from '../../services/notificationService';
+import { scheduleRoutineOnNtfyServer, sendNtfyNotification } from '../../services/ntfyService';
 import { downloadIcsFile } from '../../services/outlookService';
 
 const DIAS_SEMANA = [
@@ -33,9 +34,10 @@ export default function RotinasDiarias() {
     try {
       const items = await db.rotinas.toArray();
       setRotinas(items);
-      // Se não houver rotinas, já abre o formulário para o usuário cadastrar
       if (items.length === 0) {
         setIsAdding(true);
+      } else {
+        syncAllRoutinesWithNtfy();
       }
     } catch (err) {
       console.error('Erro ao carregar rotinas:', err);
@@ -82,9 +84,13 @@ export default function RotinasDiarias() {
   };
 
   const handleToggleActive = async (rotina) => {
+    const nextAtivo = !rotina.ativo;
     await db.rotinas.update(rotina.id, {
-      ativo: !rotina.ativo
+      ativo: nextAtivo
     });
+    if (nextAtivo) {
+      await scheduleRoutineOnNtfyServer({ ...rotina, ativo: true });
+    }
     loadRotinas();
   };
 
@@ -102,9 +108,10 @@ export default function RotinasDiarias() {
     }
   };
 
-  const handleTestRoutineAlarm = (rotina) => {
-    showNativeNotification(`⏰ [TESTE] ${rotina.titulo} (20 min antes)`, {
-      body: `Programada para às ${rotina.horario}. ${rotina.descricao}`
+  const handleTestRoutineAlarm = async (rotina) => {
+    await showNativeNotification(`⏰ [ROTINA SKY] ${rotina.titulo} (${rotina.horario})`, {
+      body: `Programada para às ${rotina.horario} (aviso às ${getAlertTime(rotina.horario)}). ${rotina.descricao || ''}`,
+      sendNtfy: true
     });
   };
 
@@ -126,14 +133,30 @@ export default function RotinasDiarias() {
     e.preventDefault();
     if (!titulo.trim() || !horario) return;
 
-    await db.rotinas.add({
+    const newRotinaData = {
       titulo: titulo.trim(),
       descricao: descricao.trim(),
       horario,
       dias: selectedDias,
       ativo: true,
       notificacaoAtiva: true,
-      ultimoAlertaData: ''
+      ultimoAlertaData: '',
+      ultimoAlertaExatoData: ''
+    };
+
+    const newId = await db.rotinas.add(newRotinaData);
+    const savedRotina = { ...newRotinaData, id: newId };
+
+    // Agenda imediatamente no servidor ntfy para hoje e amanhã
+    await scheduleRoutineOnNtfyServer(savedRotina, new Date());
+    await syncAllRoutinesWithNtfy();
+
+    // Envia confirmação imediata no ntfy informando que a rotina foi cadastrada e agendada
+    sendNtfyNotification({
+      title: `✅ Rotina Agendada: ${savedRotina.titulo} (${savedRotina.horario})`,
+      message: `Você receberá o alerta no ntfy às ${getAlertTime(savedRotina.horario)} (20 min antes) e às ${savedRotina.horario} (hora exata)!${savedRotina.descricao ? `\n📋 ${savedRotina.descricao}` : ''}`,
+      priority: 'high',
+      tags: ['calendar', 'bell']
     });
 
     setTitulo('');

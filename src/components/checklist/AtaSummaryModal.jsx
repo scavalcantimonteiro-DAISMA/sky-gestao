@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { generateAtaPDF } from '../../services/pdfGenerator';
 import { openOutlookEmailForAta, openWhatsAppAta, copyAtaToClipboard, formatDateBR } from '../../services/outlookService';
+import { getLocalTodayStr } from '../../services/notificationService';
+import { sendNtfyNotification } from '../../services/ntfyService';
 import { db } from '../../db';
 
 export default function AtaSummaryModal({ ata, onClose, onAtaSaved }) {
@@ -65,7 +67,7 @@ export default function AtaSummaryModal({ ata, onClose, onAtaSaved }) {
 
       // Se marcado para sincronizar pendências com a Gestão do Dia
       if (syncPendencias && pendenciasConsolidadas.length > 0) {
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = getLocalTodayStr();
         const pendenciasToAdd = pendenciasConsolidadas.map((p) => ({
           origem: 'ata',
           ataId: ataId,
@@ -78,6 +80,13 @@ export default function AtaSummaryModal({ ata, onClose, onAtaSaved }) {
           observacao: `Originado na visita de ${formatDateBR(ata.dataVisita)}`
         }));
         await db.pendencias.bulkAdd(pendenciasToAdd);
+
+        sendNtfyNotification({
+          title: `📋 Ata Salva: ${ata.credenciado} (${pendenciasConsolidadas.length} pendência(s))`,
+          message: pendenciasConsolidadas.map((p) => `• [${p.setor}] ${p.descricao}`).join('\n'),
+          priority: 'high',
+          tags: ['clipboard', 'bell']
+        });
       }
 
       setSavedSuccess(true);

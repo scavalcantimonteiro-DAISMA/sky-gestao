@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  X, Smartphone, BellRing, Send, CheckCircle2, 
-  ExternalLink, Copy, Check, Sparkles, ShieldCheck
+  X, Smartphone, Send, CheckCircle2, 
+  Copy, Check, Sparkles, Sun, Moon, RefreshCw
 } from 'lucide-react';
 import { getNtfyTopic, setNtfyTopic, sendNtfyNotification } from '../services/ntfyService';
+import {
+  syncAllRoutinesWithNtfy,
+  triggerMorningSummaryNow,
+  triggerEveningSummaryNow
+} from '../services/notificationService';
 
 export default function NtfyModal({ isOpen, onClose }) {
   const [topic, setTopicState] = useState('');
   const [copied, setCopied] = useState(false);
-  const [testStatus, setTestStatus] = useState(null); // null | 'sending' | 'success' | 'error'
+  const [testStatus, setTestStatus] = useState(null); // null | 'sending' | 'success' | 'error' | 'saved' | 'synced'
 
   useEffect(() => {
     if (isOpen) {
@@ -19,29 +24,51 @@ export default function NtfyModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const handleSaveTopic = (e) => {
+  const handleSaveTopic = async (e) => {
     e.preventDefault();
     if (!topic.trim()) return;
     const saved = setNtfyTopic(topic);
     setTopicState(saved);
     setTestStatus('saved');
-    setTimeout(() => setTestStatus(null), 3000);
+    await syncAllRoutinesWithNtfy();
+    setTimeout(() => setTestStatus(null), 3500);
   };
 
   const handleTestPush = async () => {
     setTestStatus('sending');
     const ok = await sendNtfyNotification({
       title: '⏰ SKY Gestão - Teste de Push!',
-      message: 'Notificação push funcionando com sucesso no seu celular, mesmo com a tela apagada!',
+      message: 'Notificação push funcionando com sucesso! Você receberá: Resumo às 08h, Rotinas ao longo do dia e Balanço às 18h.',
       priority: 'urgent',
       tags: ['rocket', 'bell', 'sky']
     });
 
-    if (ok) {
-      setTestStatus('success');
-    } else {
-      setTestStatus('error');
-    }
+    await syncAllRoutinesWithNtfy();
+    setTestStatus(ok ? 'success' : 'error');
+  };
+
+  const handleTestMorning = async () => {
+    setTestStatus('sending');
+    await triggerMorningSummaryNow();
+    setTestStatus('success');
+  };
+
+  const handleTestEvening = async () => {
+    setTestStatus('sending');
+    await triggerEveningSummaryNow();
+    setTestStatus('success');
+  };
+
+  const handleSyncAll = async () => {
+    setTestStatus('sending');
+    await syncAllRoutinesWithNtfy();
+    await sendNtfyNotification({
+      title: '🔄 Rotinas & Alertas Sincronizados!',
+      message: 'Todas as suas rotinas do dia (20 min antes e na hora exata), além dos relatórios das 08h e 18h estão ativos no ntfy!',
+      priority: 'high',
+      tags: ['white_check_mark', 'alarm_clock']
+    });
+    setTestStatus('synced');
   };
 
   const handleCopyTopic = () => {
@@ -52,7 +79,7 @@ export default function NtfyModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm p-4 flex items-center justify-center animate-in fade-in">
-      <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden space-y-5 p-6">
+      <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden space-y-4 p-6">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2.5">
@@ -61,7 +88,7 @@ export default function NtfyModal({ isOpen, onClose }) {
             </div>
             <div>
               <h3 className="text-lg font-black text-slate-900">Push Celular (ntfy.sh)</h3>
-              <p className="text-xs text-slate-500">100% Gratuito • Funciona com a tela apagada</p>
+              <p className="text-xs text-slate-500">Alertas às 08h • Rotinas do Dia • Balanço às 18h</p>
             </div>
           </div>
           <button
@@ -72,15 +99,17 @@ export default function NtfyModal({ isOpen, onClose }) {
           </button>
         </div>
 
-        {/* Explicação simples */}
-        <div className="bg-purple-50/70 border border-purple-200/80 rounded-2xl p-4 text-xs text-purple-950 space-y-2">
+        {/* Programação Automática Ativa */}
+        <div className="bg-purple-50/80 border border-purple-200 rounded-2xl p-3.5 text-xs text-purple-950 space-y-1.5">
           <p className="font-bold flex items-center gap-1.5 text-purple-900">
             <Sparkles className="w-4 h-4 text-purple-600" />
-            Você já usa o ntfy em outro app?
+            Notificações Automáticas Programadas:
           </p>
-          <p className="leading-relaxed">
-            <strong>Sim, você pode usar o mesmo aplicativo ntfy do seu celular!</strong> Basta adicionar um <strong>novo tópico</strong> para este app da SKY. Assim você recebe alertas dos dois aplicativos sem misturar nada.
-          </p>
+          <ul className="space-y-1 text-[11px] text-purple-900/90 pl-1">
+            <li>☀️ <strong>08:00h (Manhã):</strong> Lista todas as pendências em aberto e rotinas do dia.</li>
+            <li>⏰ <strong>Ao longo do dia:</strong> Avisa 20 min antes e na hora exata de cada rotina.</li>
+            <li>🌙 <strong>18:00h (Fim do dia):</strong> Balanço das concluídas hoje vs pendentes em aberto.</li>
+          </ul>
         </div>
 
         {/* Formulário de Tópico */}
@@ -120,53 +149,84 @@ export default function NtfyModal({ isOpen, onClose }) {
                 Salvar
               </button>
             </div>
-            <p className="text-[11px] text-slate-500">
-              Escolha um nome único (letras minúsculas e hífens). Exemplo: <code>sky-gestao-scavassin</code>
-            </p>
           </div>
 
           {/* Feedback */}
           {testStatus === 'saved' && (
             <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              Tópico salvo com sucesso!
+              Tópico salvo e rotinas sincronizadas!
+            </div>
+          )}
+          {testStatus === 'synced' && (
+            <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              Todas as rotinas foram agendadas no servidor ntfy!
             </div>
           )}
           {testStatus === 'success' && (
             <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold flex items-center gap-1.5 animate-in fade-in">
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              Notificação enviada! Verifique seu celular agora.
+              Enviado com sucesso! Confira no seu aplicativo ntfy agora.
             </div>
           )}
           {testStatus === 'error' && (
             <div className="p-2.5 rounded-xl bg-rose-50 text-rose-800 border border-rose-200 text-xs font-semibold">
-              Erro ao enviar teste. Verifique sua conexão.
+              Erro ao enviar. Verifique sua conexão com a internet.
             </div>
           )}
 
-          {/* Passo a passo no app do celular */}
-          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2 text-xs text-slate-700">
-            <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">
-              Passo a passo no seu celular:
-            </h4>
-            <ol className="list-decimal list-inside space-y-1 leading-relaxed text-slate-600">
-              <li>Abra o aplicativo <strong>ntfy</strong> no seu celular.</li>
-              <li>Toque no botão <strong>+</strong> (Inscrever-se em tópico).</li>
-              <li>Digite: <strong className="text-purple-700 font-mono">{topic || 'sky-gestao-seu-nome'}</strong></li>
-              <li>Toque em <strong>Inscrever-se</strong>.</li>
-            </ol>
+          {/* Botões de Disparo Imediato dos Relatórios */}
+          <div className="space-y-2 pt-1">
+            <span className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              Testar e Disparar Relatórios no Celular Agora:
+            </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={handleTestMorning}
+                disabled={testStatus === 'sending'}
+                className="p-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-bold flex items-center justify-center gap-1.5 transition"
+              >
+                <Sun className="w-4 h-4 text-amber-600" />
+                Enviar Resumo 08:00h
+              </button>
+
+              <button
+                type="button"
+                onClick={handleTestEvening}
+                disabled={testStatus === 'sending'}
+                className="p-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 text-xs font-bold flex items-center justify-center gap-1.5 transition"
+              >
+                <Moon className="w-4 h-4 text-indigo-600" />
+                Enviar Balanço 18:00h
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-            <button
-              type="button"
-              onClick={handleTestPush}
-              disabled={testStatus === 'sending'}
-              className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow transition"
-            >
-              <Send className="w-3.5 h-3.5 text-purple-400" />
-              {testStatus === 'sending' ? 'Enviando...' : 'Testar Push no Celular Agora'}
-            </button>
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-100">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleTestPush}
+                disabled={testStatus === 'sending'}
+                className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow transition"
+              >
+                <Send className="w-3.5 h-3.5 text-purple-400" />
+                {testStatus === 'sending' ? 'Enviando...' : 'Testar Push'}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSyncAll}
+                disabled={testStatus === 'sending'}
+                className="bg-purple-100 hover:bg-purple-200 text-purple-900 font-bold px-3 py-2.5 rounded-xl text-xs flex items-center gap-1.5 transition"
+                title="Sincronizar todas as rotinas na nuvem ntfy"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-purple-700" />
+                Sincronizar Rotinas
+              </button>
+            </div>
 
             <button
               type="button"

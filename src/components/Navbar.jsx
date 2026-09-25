@@ -1,21 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { ClipboardList, Clock, Bell, Home, CheckCircle2, Menu, X, Smartphone, Database } from 'lucide-react';
-import { requestNotificationPermission, showNativeNotification } from '../services/notificationService';
+import {
+  requestNotificationPermission,
+  showNativeNotification,
+  isNotificationBannerAcknowledged,
+  setNotificationBannerAcknowledged,
+  syncAllRoutinesWithNtfy
+} from '../services/notificationService';
 
 export default function Navbar({ currentTab, setCurrentTab, onOpenBackup, onOpenNtfy }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [notifState, setNotifState] = useState(
-    'Notification' in window ? Notification.permission : 'unsupported'
-  );
+  const [notifActive, setNotifActive] = useState(() => {
+    const nativeGranted = 'Notification' in window && Notification.permission === 'granted';
+    return nativeGranted || isNotificationBannerAcknowledged();
+  });
+
+  useEffect(() => {
+    const updateStatus = () => {
+      const nativeGranted = 'Notification' in window && Notification.permission === 'granted';
+      setNotifActive(nativeGranted || isNotificationBannerAcknowledged());
+    };
+    window.addEventListener('sky-notif-status-changed', updateStatus);
+    return () => window.removeEventListener('sky-notif-status-changed', updateStatus);
+  }, []);
 
   const handleRequestNotif = async () => {
-    const res = await requestNotificationPermission();
-    setNotifState(res);
-    if (res === 'granted') {
-      showNativeNotification('✅ Notificações Ativadas!', {
-        body: 'Você receberá avisos sonoros 20 minutos antes de cada rotina cadastrada.'
-      });
-    }
+    await requestNotificationPermission();
+    setNotificationBannerAcknowledged(true);
+    setNotifActive(true);
+    window.dispatchEvent(new Event('sky-notif-status-changed'));
+
+    await syncAllRoutinesWithNtfy();
+
+    await showNativeNotification('✅ Alertas SKY & Push ntfy Ativados!', {
+      body: 'Você receberá avisos às 08h (pendências), ao longo do dia (rotinas) e às 18h (balanço do dia) direto no ntfy!'
+    });
   };
 
   return (
@@ -99,18 +118,18 @@ export default function Navbar({ currentTab, setCurrentTab, onOpenBackup, onOpen
             <span>Push Celular</span>
           </button>
 
-          {/* Botão de Notificação Local */}
+          {/* Botão de Notificação Local + Push */}
           <button
             onClick={handleRequestNotif}
-            title={notifState === 'granted' ? 'Notificações ativadas' : 'Ativar notificações'}
-            className={`ml-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border transition-all ${
-              notifState === 'granted'
-                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+            title={notifActive ? 'Alertas ativados (clique para testar)' : 'Ativar alertas'}
+            className={`ml-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border transition-all cursor-pointer ${
+              notifActive
+                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20'
                 : 'bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30'
             }`}
           >
             <Bell className="w-3.5 h-3.5" />
-            {notifState === 'granted' ? 'Alertas Ativos' : 'Ativar Alertas'}
+            {notifActive ? 'Alertas Ativos' : 'Ativar Alertas'}
           </button>
         </nav>
 
@@ -135,7 +154,7 @@ export default function Navbar({ currentTab, setCurrentTab, onOpenBackup, onOpen
           <button
             onClick={handleRequestNotif}
             className={`p-2 rounded-lg text-xs border ${
-              notifState === 'granted'
+              notifActive
                 ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
                 : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
             }`}

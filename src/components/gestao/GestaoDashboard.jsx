@@ -1,19 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, CheckCircle2, Clock, Bell, AlertTriangle, 
-  ArrowRight, Sparkles, Building2, Calendar, Check, Volume2, Plus
+  ArrowRight, Sparkles, Building2, Calendar, Check, Volume2, Plus, Sun, Moon
 } from 'lucide-react';
 import { db } from '../../db';
 import PendenciasList from './PendenciasList';
 import RotinasDiarias from './RotinasDiarias';
 import { formatDateBR } from '../../services/outlookService';
-import { showNativeNotification } from '../../services/notificationService';
+import {
+  showNativeNotification,
+  getLocalTodayStr,
+  triggerMorningSummaryNow,
+  triggerEveningSummaryNow
+} from '../../services/notificationService';
+import { sendNtfyNotification } from '../../services/ntfyService';
 
 export default function GestaoDashboard({ initialSubTab = 'dashboard' }) {
   const [activeSubTab, setActiveSubTab] = useState(initialSubTab);
   const [pendencias, setPendencias] = useState([]);
   const [rotinas, setRotinas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sendingReport, setSendingReport] = useState(null);
 
   const loadData = async () => {
     setLoading(true);
@@ -58,18 +65,32 @@ export default function GestaoDashboard({ initialSubTab = 'dashboard' }) {
   const pendentes = pendencias.filter((p) => p.status === 'pendente');
   const executadas = pendencias.filter((p) => p.status === 'executado');
   const criticas = pendentes.filter((p) => getDaysOnScreen(p.dataCriacao) >= 6);
-  const emAtencao = pendentes.filter((p) => {
-    const days = getDaysOnScreen(p.dataCriacao);
-    return days >= 3 && days < 6;
-  });
 
-  const handleQuickExecute = async (pId) => {
-    const todayStr = new Date().toISOString().split('T')[0];
-    await db.pendencias.update(pId, {
+  const handleQuickExecute = async (pItem) => {
+    const todayStr = getLocalTodayStr();
+    await db.pendencias.update(pItem.id, {
       status: 'executado',
       dataExecucao: todayStr
     });
+    sendNtfyNotification({
+      title: `✅ Pendência Concluída: ${pItem.credenciado || 'Geral'}`,
+      message: `[${pItem.setor || 'Geral'}] ${pItem.descricao}`,
+      priority: 'default',
+      tags: ['white_check_mark', 'sky']
+    });
     loadData();
+  };
+
+  const handleSendMorningNow = async () => {
+    setSendingReport('morning');
+    await triggerMorningSummaryNow();
+    setTimeout(() => setSendingReport(null), 2000);
+  };
+
+  const handleSendEveningNow = async () => {
+    setSendingReport('evening');
+    await triggerEveningSummaryNow();
+    setTimeout(() => setSendingReport(null), 2000);
   };
 
   return (
@@ -119,6 +140,39 @@ export default function GestaoDashboard({ initialSubTab = 'dashboard' }) {
 
       {activeSubTab === 'dashboard' && (
         <div className="space-y-6 animate-in fade-in duration-300">
+          {/* Barra de Notificações Automáticas (08h, Rotinas e 18h) */}
+          <div className="bg-slate-900 text-white p-4 sm:p-5 rounded-3xl border border-slate-800 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-rose-400 text-xs font-bold uppercase tracking-wider">
+                <Bell className="w-4 h-4 animate-pulse" />
+                Central de Notificações Automáticas (App + ntfy)
+              </div>
+              <p className="text-xs sm:text-sm text-slate-300">
+                Envio automático às <strong>08:00h</strong> (pendências do dia), ao longo do dia (<strong>todas as rotinas</strong>) e às <strong>18:00h</strong> (concluídas vs em aberto).
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={handleSendMorningNow}
+                disabled={sendingReport !== null}
+                className="px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+              >
+                <Sun className="w-3.5 h-3.5 text-amber-400" />
+                {sendingReport === 'morning' ? 'Enviando 08h...' : 'Testar Resumo 08h'}
+              </button>
+              <button
+                type="button"
+                onClick={handleSendEveningNow}
+                disabled={sendingReport !== null}
+                className="px-3 py-2 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+              >
+                <Moon className="w-3.5 h-3.5 text-indigo-400" />
+                {sendingReport === 'evening' ? 'Enviando 18h...' : 'Testar Balanço 18h'}
+              </button>
+            </div>
+          </div>
+
           {/* Métricas Executivas do Dia */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Pendências Abertas */}
@@ -229,7 +283,7 @@ export default function GestaoDashboard({ initialSubTab = 'dashboard' }) {
 
                         <button
                           type="button"
-                          onClick={() => handleQuickExecute(p.id)}
+                          onClick={() => handleQuickExecute(p)}
                           className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-2 rounded-xl text-xs shadow transition shrink-0"
                           title="Marcar como Executado"
                         >
@@ -289,11 +343,13 @@ export default function GestaoDashboard({ initialSubTab = 'dashboard' }) {
                           type="button"
                           onClick={() => {
                             showNativeNotification(`⏰ [TESTE] ${r.titulo}`, {
-                              body: `Horário: ${r.horario}. ${r.descricao}`
+                              body: `Horário: ${r.horario}. ${r.descricao || 'Rotina diária SKY.'}`,
+                              ntfyTags: 'alarm_clock,bell,red_circle',
+                              ntfyPriority: '5',
                             });
                           }}
                           className="p-2 rounded-xl text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition"
-                          title="Testar Alarme"
+                          title="Testar Alarme + Push ntfy"
                         >
                           <Volume2 className="w-4 h-4" />
                         </button>

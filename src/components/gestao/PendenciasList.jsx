@@ -7,7 +7,8 @@ import {
 import confetti from 'canvas-confetti';
 import { db } from '../../db';
 import { formatDateBR, downloadIcsFile } from '../../services/outlookService';
-import { schedulePendenciaReminderNtfy } from '../../services/ntfyService';
+import { schedulePendenciaReminderNtfy, sendNtfyNotification } from '../../services/ntfyService';
+import { getLocalTodayStr } from '../../services/notificationService';
 
 export default function PendenciasList() {
   const [pendencias, setPendencias] = useState([]);
@@ -95,7 +96,7 @@ export default function PendenciasList() {
   // Alterna status entre Pendente e Executado
   const handleToggleStatus = async (item) => {
     const nextStatus = item.status === 'pendente' ? 'executado' : 'pendente';
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getLocalTodayStr();
 
     await db.pendencias.update(item.id, {
       status: nextStatus,
@@ -110,6 +111,13 @@ export default function PendenciasList() {
           origin: { y: 0.8 }
         });
       } catch (e) {}
+
+      sendNtfyNotification({
+        title: `✅ Pendência Concluída: ${item.credenciado || 'Geral'}`,
+        message: `[${item.setor || 'Geral'}] ${item.descricao}`,
+        priority: 'default',
+        tags: ['white_check_mark', 'sky']
+      });
     }
 
     loadPendencias();
@@ -148,16 +156,15 @@ export default function PendenciasList() {
 
     // Se adicionou lembrete futuro, agenda no ntfy
     if (editLembreteEm) {
-      const delayMs = new Date(editLembreteEm).getTime() - Date.now();
-      if (delayMs > 0) {
-        const delayMin = Math.max(1, Math.round(delayMs / 60000));
+      const targetTimeMs = new Date(editLembreteEm).getTime();
+      if (targetTimeMs > Date.now() + 15000) {
         schedulePendenciaReminderNtfy(
           {
             credenciado: editCredenciado.trim() || 'Geral',
             setor: editSetor,
             descricao: editDescricao.trim()
           },
-          `${delayMin}m`
+          String(Math.floor(targetTimeMs / 1000))
         );
       }
     }
@@ -170,12 +177,15 @@ export default function PendenciasList() {
     e.preventDefault();
     if (!newDescricao.trim()) return;
 
-    const todayStr = new Date().toISOString().split('T')[0];
-    const newId = await db.pendencias.add({
+    const todayStr = getLocalTodayStr();
+    const credName = newCredenciado.trim() || 'Geral';
+    const descText = newDescricao.trim();
+
+    await db.pendencias.add({
       origem: 'manual',
-      credenciado: newCredenciado.trim() || 'Geral',
+      credenciado: credName,
       setor: newSetor,
-      descricao: newDescricao.trim(),
+      descricao: descText,
       status: 'pendente',
       dataCriacao: todayStr,
       prioridade: newPrioridade,
@@ -184,18 +194,25 @@ export default function PendenciasList() {
       observacao: ''
     });
 
-    // Se programou lembrete, agenda no ntfy para o celular
+    // Notifica imediatamente no ntfy sobre a nova pendência registrada
+    sendNtfyNotification({
+      title: `📌 Nova Pendência Registrada: ${credName}`,
+      message: `[${newSetor}] ${descText}${newLembreteEm ? `\n⏰ Lembrete agendado para: ${formatDateTimeBR(newLembreteEm)}` : ''}`,
+      priority: newPrioridade === 'alta' ? 'urgent' : 'high',
+      tags: ['pushpin', 'memo']
+    });
+
+    // Se programou lembrete, agenda também na nuvem do ntfy para o horário escolhido
     if (newLembreteEm) {
-      const delayMs = new Date(newLembreteEm).getTime() - Date.now();
-      if (delayMs > 0) {
-        const delayMin = Math.max(1, Math.round(delayMs / 60000));
+      const targetTimeMs = new Date(newLembreteEm).getTime();
+      if (targetTimeMs > Date.now() + 15000) {
         schedulePendenciaReminderNtfy(
           {
-            credenciado: newCredenciado.trim() || 'Geral',
+            credenciado: credName,
             setor: newSetor,
-            descricao: newDescricao.trim()
+            descricao: descText
           },
-          `${delayMin}m`
+          String(Math.floor(targetTimeMs / 1000))
         );
       }
     }
