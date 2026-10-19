@@ -10,6 +10,7 @@ import NtfyModal from './components/NtfyModal';
 import { seedInitialDataIfNeeded } from './db';
 import { startReminderWatcher } from './services/notificationService';
 import { startRealtimeCloudSync } from './services/cloudSyncService';
+import { refreshPdvsFromCloud } from './services/pdvResultsService';
 import { Shield, Smartphone } from 'lucide-react';
 
 export default function App() {
@@ -24,10 +25,13 @@ export default function App() {
     // 2. Inicia sincronização em tempo real entre Site (PC) e App (Celular)
     startRealtimeCloudSync();
 
-    // 3. Inicia o monitor de lembretes (20 min antes + 08h + 18h)
+    // 3. Atualiza dados dos PDVs do Projeto SKY Correto automaticamente da nuvem
+    refreshPdvsFromCloud().catch(() => {});
+
+    // 4. Inicia o monitor de lembretes (20 min antes + 08h + 18h)
     startReminderWatcher();
 
-    // 4. Registra e atualiza o Service Worker para PWA e notificações móveis
+    // 5. Registra e atualiza o Service Worker para PWA e notificações móveis
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker
         .register('/sw.js')
@@ -36,6 +40,7 @@ export default function App() {
           document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
               reg.update().catch(() => {});
+              refreshPdvsFromCloud().catch(() => {});
             }
           });
         })
@@ -43,6 +48,14 @@ export default function App() {
           console.warn('Erro ao registrar Service Worker:', err);
         });
     }
+
+    const handleFocus = () => {
+      refreshPdvsFromCloud().catch(() => {});
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   return (

@@ -9,7 +9,9 @@ import {
   getPdvByCode, 
   formatPercent, 
   evaluateTarget, 
-  TARGETS 
+  TARGETS,
+  getPdvMetadata,
+  refreshPdvsFromCloud
 } from '../../services/pdvResultsService';
 
 export default function StepCredenciado({ data, onChange, onAutoFillPdv }) {
@@ -21,8 +23,24 @@ export default function StepCredenciado({ data, onChange, onAutoFillPdv }) {
   const [selectedPdvData, setSelectedPdvData] = useState(() => {
     return data.pdv ? getPdvByCode(data.pdv) : null;
   });
+  const [meta, setMeta] = useState(() => getPdvMetadata());
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncFeedback, setSyncFeedback] = useState(null);
 
   const searchBoxRef = useRef(null);
+
+  // Escuta atualizações automáticas da nuvem do Projeto SKY Correto
+  useEffect(() => {
+    const handlePdvUpdate = () => {
+      setMeta(getPdvMetadata());
+      if (data.pdv) {
+        const refreshed = getPdvByCode(data.pdv);
+        if (refreshed) setSelectedPdvData(refreshed);
+      }
+    };
+    window.addEventListener('sky:pdvs-updated', handlePdvUpdate);
+    return () => window.removeEventListener('sky:pdvs-updated', handlePdvUpdate);
+  }, [data.pdv]);
 
   useEffect(() => {
     if (data.pdv && !selectedPdvData) {
@@ -74,6 +92,43 @@ export default function StepCredenciado({ data, onChange, onAutoFillPdv }) {
     onChange('pdv', '');
   };
 
+  const handleManualSync = async () => {
+    setIsSyncing(true);
+    setSyncFeedback(null);
+    const res = await refreshPdvsFromCloud();
+    setIsSyncing(false);
+    if (res.success) {
+      setMeta(res.meta);
+      setSyncFeedback('✅ Planilha sincronizada!');
+      if (data.pdv) {
+        const refreshed = getPdvByCode(data.pdv);
+        if (refreshed) {
+          setSelectedPdvData(refreshed);
+          if (onAutoFillPdv) onAutoFillPdv(refreshed);
+        }
+      }
+    } else {
+      setSyncFeedback('Modo Offline (usando dados salvos)');
+    }
+    setTimeout(() => setSyncFeedback(null), 4000);
+  };
+
+  const formatUpdateDate = (dateStr) => {
+    if (!dateStr) return '';
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       {/* Cabeçalho */}
@@ -89,14 +144,38 @@ export default function StepCredenciado({ data, onChange, onAutoFillPdv }) {
 
       {/* Caixa de Busca Inteligente de PDV */}
       <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 p-5 sm:p-6 rounded-3xl text-white shadow-lg border border-slate-700/60 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <label className="text-sm font-bold text-rose-400 flex items-center gap-2">
-            <Sparkles className="w-4 h-4" />
-            Buscar PDV / Credenciado (Base Projeto SKY)
-          </label>
-          <span className="text-[11px] text-slate-400 font-medium">
-            111 PDVs integrados • Puxa indicadores oficiais na hora
-          </span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-800 pb-3">
+          <div>
+            <label className="text-sm font-bold text-rose-400 flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              Buscar PDV / Credenciado (Base Projeto SKY)
+            </label>
+            <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-300">
+              <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+              <span>
+                Planilha Ativa: <strong className="text-white">{meta?.sourceName || 'Resultados atualizados.xlsx'}</strong>
+                {meta?.updatedAt && ` (${formatUpdateDate(meta.updatedAt)})`}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            {syncFeedback && (
+              <span className="text-[11px] font-bold text-emerald-300 animate-in fade-in">
+                {syncFeedback}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={handleManualSync}
+              disabled={isSyncing}
+              className="text-xs font-bold px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 transition flex items-center gap-1.5 disabled:opacity-60 shadow-sm"
+              title="Buscar imediatamente os dados mais recentes salvos no Projeto SKY Correto"
+            >
+              <RotateCcw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin text-rose-400' : 'text-slate-400'}`} />
+              <span>{isSyncing ? 'Sincronizando...' : 'Sincronizar Planilha'}</span>
+            </button>
+          </div>
         </div>
 
         <div className="relative" ref={searchBoxRef}>

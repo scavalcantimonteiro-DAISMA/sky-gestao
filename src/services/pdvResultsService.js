@@ -189,18 +189,52 @@ export function applyPdvToFormData(pdvItem, prevFormData) {
 }
 
 /**
- * Atualiza os resultados de PDVs em segundo plano caso haja internet,
- * consultando a planilha mais recente do projeto SKY Correto.
+ * Retorna os metadados da última atualização da planilha (data e nome do arquivo)
+ */
+export function getPdvMetadata() {
+  if (typeof window !== 'undefined') {
+    try {
+      const cached = localStorage.getItem(CACHE_META_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && typeof parsed === 'object') return parsed;
+      }
+    } catch (e) {
+      console.warn('Erro ao ler metadados de PDVs:', e);
+    }
+  }
+  return SKY_PDVS_METADATA;
+}
+
+/**
+ * Atualiza os resultados de PDVs em tempo real consultando a planilha mais recente 
+ * do projeto SKY Correto salva no Firebase Firestore.
+ * Totalmente resiliente offline: se falhar ou sem rede, mantém os dados salvos localmente.
  */
 export async function refreshPdvsFromCloud() {
   try {
-    const res = await fetch(
-      'https://firestore.googleapis.com/v1/projects/resultado-credenciados/databases/(default)/documents/dadosPlanilha/principal'
-    );
-    if (!res.ok) return false;
+    // Adiciona timestamp para desabilitar cache de proxy ou do navegador
+    const url = `https://firestore.googleapis.com/v1/projects/resultado-credenciados/databases/(default)/documents/dadosPlanilha/principal?t=${Date.now()}`;
+    const res = await fetch(url, {
+      cache: 'no-store',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!res.ok) {
+      console.warn('Aviso: Não foi possível obter dados da nuvem. Código:', res.status);
+      return { success: false, reason: `HTTP ${res.status}` };
+    }
+
     const doc = await res.json();
     const rows = doc.fields?.rows?.arrayValue?.values || [];
-    if (!rows.length) return false;
+    if (!rows.length) {
+      return { success: false, reason: 'Nenhuma linha encontrada na planilha da nuvem' };
+    }
+
+    const sourceName = doc.fields?.sourceName?.stringValue || 'Planilha Nuvem';
+    const updatedAt = doc.fields?.updatedAt?.timestampValue || new Date().toISOString();
 
     // Converte os dados do Firestore
     const currentList = [...getAllPdvs()];
@@ -237,14 +271,25 @@ export async function refreshPdvsFromCloud() {
     });
 
     const updated = Array.from(map.values()).sort((a, b) => a.pdv.localeCompare(b.pdv));
+    const meta = {
+      updatedAt,
+      sourceName,
+      totalPdvs: updated.length,
+      syncedAt: new Date().toISOString()
+    };
+
     localStorage.setItem(CACHE_KEY, JSON.stringify(updated));
-    localStorage.setItem(CACHE_META_KEY, JSON.stringify({
-      updatedAt: doc.fields?.updatedAt?.timestampValue || new Date().toISOString(),
-      sourceName: doc.fields?.sourceName?.stringValue || 'Planilha Nuvem'
-    }));
-    return true;
+    localStorage.setItem(CACHE_META_KEY, JSON.stringify(meta));
+
+    // Notifica componentes da atualização em tempo real
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('sky:pdvs-updated', { detail: meta }));
+    }
+
+    return { success: true, meta, count: updated.length };
   } catch (err) {
     console.warn('Erro ao atualizar PDVs da nuvem (usando dados locais):', err);
-    return false;
+    return { success: false, reason: err.message };
   }
 }
+
