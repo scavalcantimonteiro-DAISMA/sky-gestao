@@ -10,6 +10,7 @@ import { formatDateBR, downloadIcsFile } from '../../services/outlookService';
 import { schedulePendenciaReminderNtfy, sendNtfyNotification } from '../../services/ntfyService';
 import { getLocalTodayStr } from '../../services/notificationService';
 import { syncToCloudNow } from '../../services/cloudSyncService';
+import { getCurrentUser } from '../../services/authService';
 
 export default function PendenciasList() {
   const [pendencias, setPendencias] = useState([]);
@@ -37,8 +38,11 @@ export default function PendenciasList() {
   const loadPendencias = async () => {
     setLoading(true);
     try {
+      const currentUser = getCurrentUser();
+      const userLogin = currentUser ? currentUser.login : 'Saulo';
       const items = await db.pendencias.toArray();
-      setPendencias(items);
+      const userItems = items.filter((p) => !p.usuario || p.usuario === userLogin);
+      setPendencias(userItems);
     } catch (err) {
       console.error('Erro ao carregar pendências:', err);
     } finally {
@@ -190,8 +194,12 @@ export default function PendenciasList() {
     const credName = newCredenciado.trim() || 'Geral';
     const descText = newDescricao.trim();
 
+    const currentUser = getCurrentUser();
+    const userLogin = currentUser ? currentUser.login : 'Saulo';
+
     await db.pendencias.add({
       origem: 'manual',
+      usuario: userLogin,
       credenciado: credName,
       setor: newSetor,
       descricao: descText,

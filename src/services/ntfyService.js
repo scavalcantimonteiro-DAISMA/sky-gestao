@@ -1,17 +1,25 @@
-// Serviço de Notificações Push via ntfy.sh (100% Gratuito, sem necessidade de servidor ou cadastro)
-// Permite notificações mesmo com o celular desligado, tela bloqueada e suporta agendamentos nativos na nuvem
+import { getCurrentUser, setCurrentUser } from './authService';
 
 const STORAGE_KEY = 'sky_gestao_ntfy_topic';
-const DEFAULT_TOPIC = 'sky-gestao-alertas';
+const DEFAULT_TOPIC = 'sky-gestao-saulo-notificacoes-928471';
 const SCHEDULED_KEYS_STORAGE = 'sky_ntfy_scheduled_keys_v2';
 
 export function getNtfyTopic() {
+  const user = getCurrentUser();
+  if (user && user.ntfyTopic) {
+    return user.ntfyTopic;
+  }
   return localStorage.getItem(STORAGE_KEY) || DEFAULT_TOPIC;
 }
 
 export function setNtfyTopic(topic) {
   const cleanTopic = topic.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-');
   localStorage.setItem(STORAGE_KEY, cleanTopic);
+  const user = getCurrentUser();
+  if (user) {
+    user.ntfyTopic = cleanTopic;
+    setCurrentUser(user);
+  }
   // Limpa agendamentos antigos ao trocar de tópico para reagendar no novo tópico
   localStorage.removeItem(SCHEDULED_KEYS_STORAGE);
   return cleanTopic;

@@ -144,11 +144,21 @@ export default function NtfyModal({ isOpen, onClose }) {
 
               <button
                 type="submit"
-                className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow transition"
+                className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow transition cursor-pointer"
               >
                 Salvar
               </button>
             </div>
+
+            <a
+              href={`https://ntfy.sh/${topic}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-2.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 font-bold text-xs flex items-center justify-center gap-2 transition"
+            >
+              <Smartphone className="w-4 h-4 text-purple-700" />
+              <span>Abrir no App ntfy (Inscrever Celular em 1 Clique)</span>
+            </a>
           </div>
 
           {/* Feedback */}

@@ -5,8 +5,9 @@ import {
 } from 'lucide-react';
 import { db } from '../db';
 import { formatDateBR } from '../services/outlookService';
+import { getCurrentUser } from '../services/authService';
 
-export default function HomeDashboard({ onSelectTab }) {
+export default function HomeDashboard({ onSelectTab, currentUser: propUser }) {
   const [stats, setStats] = useState({
     atasCount: 0,
     lastAta: null,
@@ -24,7 +25,26 @@ export default function HomeDashboard({ onSelectTab }) {
           db.rotinas.toArray()
         ]);
 
-        const pendentes = pendencias.filter((p) => p.status === 'pendente');
+        const user = propUser || getCurrentUser();
+        const userLogin = user?.login || 'Saulo';
+        const isMaster = userLogin.toLowerCase() === 'saulo';
+
+        const myAtas = atas.filter((a) => {
+          if (isMaster) return !a.usuario || a.usuario === 'Saulo' || a.usuario === userLogin;
+          return a.usuario === userLogin;
+        });
+
+        const myPendencias = pendencias.filter((p) => {
+          if (isMaster) return !p.usuario || p.usuario === 'Saulo' || p.usuario === userLogin;
+          return p.usuario === userLogin;
+        });
+
+        const myRotinas = rotinas.filter((r) => {
+          if (isMaster) return !r.usuario || r.usuario === 'Saulo' || r.usuario === userLogin;
+          return r.usuario === userLogin;
+        });
+
+        const pendentes = myPendencias.filter((p) => p.status === 'pendente');
         
         // Críticas (6+ dias)
         const today = new Date();
@@ -38,14 +58,14 @@ export default function HomeDashboard({ onSelectTab }) {
         });
 
         // Ordena atas para pegar a última
-        atas.sort((a, b) => new Date(b.dataVisita || b.createdAt) - new Date(a.dataVisita || a.createdAt));
+        myAtas.sort((a, b) => new Date(b.dataVisita || b.createdAt) - new Date(a.dataVisita || a.createdAt));
 
         setStats({
-          atasCount: atas.length,
-          lastAta: atas.length > 0 ? atas[0] : null,
+          atasCount: myAtas.length,
+          lastAta: myAtas.length > 0 ? myAtas[0] : null,
           pendentesCount: pendentes.length,
           criticasCount: criticas.length,
-          rotinasCount: rotinas.filter((r) => r.ativo).length
+          rotinasCount: myRotinas.filter((r) => r.ativo).length
         });
       } catch (e) {
         console.error('Erro ao carregar estatísticas:', e);
@@ -56,7 +76,7 @@ export default function HomeDashboard({ onSelectTab }) {
     const handleRemoteSync = () => loadStats();
     window.addEventListener('sky-db-synced', handleRemoteSync);
     return () => window.removeEventListener('sky-db-synced', handleRemoteSync);
-  }, []);
+  }, [propUser]);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">

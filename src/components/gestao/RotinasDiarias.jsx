@@ -8,6 +8,7 @@ import { showNativeNotification, syncAllRoutinesWithNtfy } from '../../services/
 import { scheduleRoutineOnNtfyServer, sendNtfyNotification } from '../../services/ntfyService';
 import { downloadIcsFile } from '../../services/outlookService';
 import { syncToCloudNow } from '../../services/cloudSyncService';
+import { getCurrentUser } from '../../services/authService';
 
 const DIAS_SEMANA = [
   { id: 1, label: 'Seg', full: 'Segunda-feira' },
@@ -34,9 +35,12 @@ export default function RotinasDiarias() {
   const loadRotinas = async () => {
     setLoading(true);
     try {
+      const currentUser = getCurrentUser();
+      const userLogin = currentUser ? currentUser.login : 'Saulo';
       const items = await db.rotinas.toArray();
-      setRotinas(items);
-      if (items.length > 0) {
+      const userItems = items.filter((r) => !r.usuario || r.usuario === userLogin);
+      setRotinas(userItems);
+      if (userItems.length > 0) {
         syncAllRoutinesWithNtfy();
       }
     } catch (err) {
@@ -190,7 +194,11 @@ export default function RotinasDiarias() {
       return;
     }
 
+    const currentUser = getCurrentUser();
+    const userLogin = currentUser ? currentUser.login : 'Saulo';
+
     const newRotinaData = {
+      usuario: userLogin,
       titulo: titulo.trim(),
       descricao: descricao.trim(),
       horario,

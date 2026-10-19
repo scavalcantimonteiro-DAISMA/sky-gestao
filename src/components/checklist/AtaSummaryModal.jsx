@@ -9,6 +9,7 @@ import { openOutlookEmailForAta, openWhatsAppAta, copyAtaToClipboard, formatDate
 import { getLocalTodayStr } from '../../services/notificationService';
 import { sendNtfyNotification } from '../../services/ntfyService';
 import { syncToCloudNow } from '../../services/cloudSyncService';
+import { getCurrentUser } from '../../services/authService';
 import { db } from '../../db';
 
 export default function AtaSummaryModal({ ata, onClose, onAtaSaved }) {
@@ -58,8 +59,12 @@ export default function AtaSummaryModal({ ata, onClose, onAtaSaved }) {
   const handleSaveAta = async () => {
     setIsSaving(true);
     try {
+      const currentUser = getCurrentUser();
+      const userLogin = currentUser ? currentUser.login : 'Saulo';
+
       const ataToSave = {
         ...ata,
+        usuario: ata.usuario || userLogin,
         todasPendencias: pendenciasConsolidadas,
         createdAt: new Date().toISOString()
       };
@@ -72,6 +77,7 @@ export default function AtaSummaryModal({ ata, onClose, onAtaSaved }) {
         const pendenciasToAdd = pendenciasConsolidadas.map((p) => ({
           origem: 'ata',
           ataId: ataId,
+          usuario: userLogin,
           credenciado: ata.credenciado,
           setor: p.setor,
           descricao: p.descricao,

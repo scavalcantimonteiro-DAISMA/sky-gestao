@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ClipboardList, Clock, Bell, Home, CheckCircle2, Menu, X, Smartphone, Database, RefreshCw, CloudCheck } from 'lucide-react';
+import { ClipboardList, Clock, Bell, Home, CheckCircle2, Menu, X, Smartphone, Database, RefreshCw, CloudCheck, Users, LogOut } from 'lucide-react';
 import {
   requestNotificationPermission,
   showNativeNotification,
@@ -9,7 +9,7 @@ import {
 } from '../services/notificationService';
 import { syncToCloudNow, pullFromCloudNow, isDesktopDevice } from '../services/cloudSyncService';
 
-export default function Navbar({ currentTab, setCurrentTab, onOpenBackup, onOpenNtfy }) {
+export default function Navbar({ currentTab, setCurrentTab, onOpenBackup, onOpenNtfy, currentUser, onLogout }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [syncStatus, setSyncStatus] = useState('synced'); // 'synced' | 'syncing' | 'error'
   const [notifActive, setNotifActive] = useState(() => {
@@ -124,6 +124,22 @@ export default function Navbar({ currentTab, setCurrentTab, onOpenBackup, onOpen
             Gestão do Dia & Lembretes
           </button>
 
+          {/* Botão Gestão da Equipe (Apenas ADMIN) */}
+          {currentUser?.role === 'ADMIN' && (
+            <button
+              onClick={() => setCurrentTab('equipe')}
+              className={`px-3 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-1.5 ${
+                currentTab === 'equipe'
+                  ? 'bg-amber-500 text-slate-950 font-black shadow-md shadow-amber-500/30'
+                  : 'text-amber-300 hover:text-white hover:bg-amber-500/20 border border-amber-500/40'
+              }`}
+              title="Painel Exclusivo de Gestão da Equipe (Admin Master)"
+            >
+              <Users className="w-4 h-4 text-amber-400" />
+              <span>Gestão da Equipe</span>
+            </button>
+          )}
+
           {/* Botão Sincronizar Nuvem (Site <-> App Celular) */}
           <button
             onClick={handleManualSync}
@@ -167,6 +183,27 @@ export default function Navbar({ currentTab, setCurrentTab, onOpenBackup, onOpen
             <Bell className="w-3.5 h-3.5" />
             {notifActive ? 'Alertas Ativos' : 'Ativar Alertas'}
           </button>
+
+          {/* Informações do Usuário & Logout */}
+          {currentUser && (
+            <div className="flex items-center gap-2 pl-2 border-l border-slate-700/80">
+              <div className="flex flex-col text-right leading-none">
+                <span className="text-xs font-bold text-white max-w-[120px] truncate" title={currentUser.nome || currentUser.login}>
+                  {currentUser.nome || currentUser.login}
+                </span>
+                <span className="text-[10px] text-slate-400 mt-0.5">
+                  {currentUser.role === 'ADMIN' ? 'Admin Master' : (currentUser.cargo || 'Colaborador')}
+                </span>
+              </div>
+              <button
+                onClick={onLogout}
+                title="Sair da Conta (Logout)"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition border border-transparent hover:border-rose-500/30"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </nav>
 
         {/* Mobile Menu Button */}
@@ -260,6 +297,20 @@ export default function Navbar({ currentTab, setCurrentTab, onOpenBackup, onOpen
             Gestão do Dia & Pendências
           </button>
 
+          {currentUser?.role === 'ADMIN' && (
+            <button
+              onClick={() => { setCurrentTab('equipe'); setMobileMenuOpen(false); }}
+              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2.5 ${
+                currentTab === 'equipe'
+                  ? 'bg-amber-500 text-slate-950 font-black shadow'
+                  : 'text-amber-300 hover:bg-slate-800 border border-amber-500/30'
+              }`}
+            >
+              <Users className="w-4 h-4 text-amber-400" />
+              Gestão da Equipe (Admin)
+            </button>
+          )}
+
           <button
             onClick={() => { onOpenBackup(); setMobileMenuOpen(false); }}
             className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2.5 text-rose-400 hover:bg-slate-800"
@@ -267,6 +318,26 @@ export default function Navbar({ currentTab, setCurrentTab, onOpenBackup, onOpen
             <Database className="w-4 h-4" />
             Fazer Backup / Exportar Excel
           </button>
+
+          {currentUser && (
+            <div className="pt-3 border-t border-slate-800 flex items-center justify-between px-2">
+              <div className="flex flex-col">
+                <span className="text-xs font-bold text-white">
+                  {currentUser.nome || currentUser.login}
+                </span>
+                <span className="text-[10px] text-slate-400">
+                  {currentUser.role === 'ADMIN' ? 'Admin Master' : (currentUser.cargo || 'Colaborador')}
+                </span>
+              </div>
+              <button
+                onClick={() => { setMobileMenuOpen(false); onLogout(); }}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-400 hover:bg-rose-500/10 border border-rose-500/30 flex items-center gap-1.5"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sair</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
     </header>

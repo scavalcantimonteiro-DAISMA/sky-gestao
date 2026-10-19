@@ -7,19 +7,38 @@ import AtaHistory from './components/checklist/AtaHistory';
 import GestaoDashboard from './components/gestao/GestaoDashboard';
 import BackupModal from './components/BackupModal';
 import NtfyModal from './components/NtfyModal';
+import LoginScreen from './components/LoginScreen';
+import ForcePasswordModal from './components/ForcePasswordModal';
+import GestaoEquipe from './components/admin/GestaoEquipe';
 import { seedInitialDataIfNeeded } from './db';
 import { startReminderWatcher } from './services/notificationService';
 import { startRealtimeCloudSync } from './services/cloudSyncService';
 import { refreshPdvsFromCloud } from './services/pdvResultsService';
+import { getCurrentUser, initAuth, logout } from './services/authService';
 import { Shield, Smartphone } from 'lucide-react';
 
 export default function App() {
+  const [currentUser, setCurrentUser] = useState(() => getCurrentUser());
+  const [authLoading, setAuthLoading] = useState(true);
   const [currentTab, setCurrentTab] = useState('home');
   const [isBackupOpen, setIsBackupOpen] = useState(false);
   const [isNtfyOpen, setIsNtfyOpen] = useState(false);
 
   useEffect(() => {
-    // 1. Carrega dados iniciais do banco
+    // 0. Inicializa Auth e sincroniza usuários
+    initAuth()
+      .then((user) => {
+        if (user) setCurrentUser(user);
+      })
+      .catch((e) => console.warn('Erro ao inicializar auth:', e))
+      .finally(() => setAuthLoading(false));
+
+    const handleAuthChange = (e) => {
+      setCurrentUser(e.detail?.user || null);
+    };
+    window.addEventListener('sky-auth-changed', handleAuthChange);
+
+    // 1. Carrega dados iniciais do banco Dexie
     seedInitialDataIfNeeded();
 
     // 2. Inicia sincronização em tempo real entre Site (PC) e App (Celular)
@@ -53,17 +72,54 @@ export default function App() {
       refreshPdvsFromCloud().catch(() => {});
     };
     window.addEventListener('focus', handleFocus);
+
     return () => {
+      window.removeEventListener('sky-auth-changed', handleAuthChange);
       window.removeEventListener('focus', handleFocus);
     };
   }, []);
 
+  const handleLogout = () => {
+    logout();
+    setCurrentUser(null);
+    setCurrentTab('home');
+  };
+
+  // Tela de Carregamento inicial
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-4 select-none">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-rose-600 to-red-500 flex items-center justify-center shadow-2xl shadow-rose-600/40 animate-pulse">
+          <span className="text-white font-black text-2xl tracking-tighter">SKY</span>
+        </div>
+        <p className="mt-4 text-xs font-semibold text-slate-400 tracking-wider uppercase animate-pulse">
+          Iniciando Supervisão de Campo...
+        </p>
+      </div>
+    );
+  }
+
+  // Se não estiver logado, exibe tela de login
+  if (!currentUser) {
+    return <LoginScreen onLoginSuccess={(user) => setCurrentUser(user)} />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-100/70 text-slate-800 flex flex-col font-sans">
+      {/* Modal obrigatório de troca de senha no 1º acesso */}
+      {currentUser?.precisaTrocarSenha && (
+        <ForcePasswordModal
+          user={currentUser}
+          onSuccess={(updatedUser) => setCurrentUser(updatedUser)}
+        />
+      )}
+
       {/* Top Navbar */}
       <Navbar
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
+        currentUser={currentUser}
+        onLogout={handleLogout}
         onOpenBackup={() => setIsBackupOpen(true)}
         onOpenNtfy={() => setIsNtfyOpen(true)}
       />
@@ -75,6 +131,7 @@ export default function App() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 sm:py-8">
         {currentTab === 'home' && (
           <HomeDashboard
+            currentUser={currentUser}
             onSelectTab={(tab) => {
               setCurrentTab(tab);
               window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -84,6 +141,7 @@ export default function App() {
 
         {currentTab === 'checklist' && (
           <ChecklistWizard
+            currentUser={currentUser}
             onCompleteChecklist={() => {
               setCurrentTab('historico-atas');
             }}
@@ -92,6 +150,7 @@ export default function App() {
 
         {currentTab === 'historico-atas' && (
           <AtaHistory
+            currentUser={currentUser}
             onNewChecklist={() => {
               setCurrentTab('checklist');
             }}
@@ -108,6 +167,10 @@ export default function App() {
 
         {currentTab === 'rotinas' && (
           <GestaoDashboard initialSubTab="rotinas" />
+        )}
+
+        {currentTab === 'equipe' && currentUser?.role === 'ADMIN' && (
+          <GestaoEquipe currentUser={currentUser} />
         )}
       </main>
 
@@ -130,12 +193,14 @@ export default function App() {
           </div>
         </div>
       </footer>
+
       {/* Modal de Backup e Exportação para Excel */}
       <BackupModal
         isOpen={isBackupOpen}
         onClose={() => setIsBackupOpen(false)}
         onDataRestored={() => window.location.reload()}
       />
+
       {/* Modal de Configuração Push Celular ntfy */}
       <NtfyModal
         isOpen={isNtfyOpen}

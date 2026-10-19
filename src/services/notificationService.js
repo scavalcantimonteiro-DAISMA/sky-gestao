@@ -5,6 +5,7 @@ import {
   isNtfyKeyScheduled,
   markNtfyKeyScheduled
 } from './ntfyService';
+import { getCurrentUser } from './authService';
 
 const BANNER_ACK_KEY = 'sky_gestao_notif_banner_ack';
 
@@ -152,11 +153,17 @@ function isDateInRoutineDays(routineDays = [], dateObj = new Date()) {
 // Sincroniza todas as rotinas ativas de hoje e de amanhã no servidor ntfy.sh
 export async function syncAllRoutinesWithNtfy() {
   try {
+    const currentUser = getCurrentUser();
+    if (!currentUser) return;
+
     const todasRotinas = await db.rotinas.toArray();
+    const rotinasUsuario = todasRotinas.filter(
+      (r) => !r.usuario || r.usuario === currentUser.login
+    );
     const today = new Date();
     const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-    for (const rotina of todasRotinas) {
+    for (const rotina of rotinasUsuario) {
       if (rotina.ativo === false || rotina.notificacaoAtiva === false) continue;
       await scheduleRoutineOnNtfyServer(rotina, today);
       await scheduleRoutineOnNtfyServer(rotina, tomorrow);
@@ -172,10 +179,16 @@ export async function checkRoutineReminders() {
   const currentMinutesFromMidnight = now.getHours() * 60 + now.getMinutes();
   const todayStr = getLocalTodayStr(now);
 
+  const currentUser = getCurrentUser();
+  if (!currentUser) return;
+
   try {
     const todasRotinas = await db.rotinas.toArray();
+    const rotinasUsuario = todasRotinas.filter(
+      (r) => !r.usuario || r.usuario === currentUser.login
+    );
 
-    for (const rotina of todasRotinas) {
+    for (const rotina of rotinasUsuario) {
       if (rotina.ativo === false || rotina.notificacaoAtiva === false) continue;
 
       // Garante que agendamentos futuros de hoje estejam registrados na nuvem ntfy
@@ -244,8 +257,15 @@ export async function checkPendenciasReminders() {
   const now = new Date();
   const currentTimestamp = now.getTime();
 
+  const currentUser = getCurrentUser();
+  if (!currentUser) return;
+
   try {
-    const pendencias = await db.pendencias.toArray();
+    const todasPendencias = await db.pendencias.toArray();
+    const pendencias = todasPendencias.filter(
+      (p) => !p.usuario || p.usuario === currentUser.login
+    );
+
     for (const p of pendencias) {
       if (p.status !== 'pendente' || !p.lembreteEm) continue;
       const lembreteTime = new Date(p.lembreteEm).getTime();
@@ -274,10 +294,16 @@ export async function checkPendenciasReminders() {
  * Constrói o texto do Resumo Matinal das 08:00h (Todas as Pendências em Aberto + Rotinas do Dia)
  */
 export async function buildMorningSummaryPayload() {
-  const [pendencias, rotinas] = await Promise.all([
+  const currentUser = getCurrentUser();
+  const userLogin = currentUser ? currentUser.login : 'Saulo';
+
+  const [allPendencias, allRotinas] = await Promise.all([
     db.pendencias.toArray(),
     db.rotinas.toArray()
   ]);
+
+  const pendencias = allPendencias.filter((p) => !p.usuario || p.usuario === userLogin);
+  const rotinas = allRotinas.filter((r) => !r.usuario || r.usuario === userLogin);
 
   const now = new Date();
   const abertas = pendencias.filter((p) => p.status === 'pendente');
@@ -319,7 +345,11 @@ export async function buildMorningSummaryPayload() {
  * Constrói o texto do Balanço das 18:00h (Concluídas no dia vs Não Concluídas em Aberto)
  */
 export async function buildEveningSummaryPayload() {
-  const pendencias = await db.pendencias.toArray();
+  const currentUser = getCurrentUser();
+  const userLogin = currentUser ? currentUser.login : 'Saulo';
+
+  const allPendencias = await db.pendencias.toArray();
+  const pendencias = allPendencias.filter((p) => !p.usuario || p.usuario === userLogin);
   const todayStr = getLocalTodayStr();
 
   const concluidasHoje = pendencias.filter(

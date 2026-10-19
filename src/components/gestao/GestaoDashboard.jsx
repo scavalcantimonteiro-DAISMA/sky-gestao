@@ -15,6 +15,7 @@ import {
 } from '../../services/notificationService';
 import { sendNtfyNotification } from '../../services/ntfyService';
 import { syncToCloudNow } from '../../services/cloudSyncService';
+import { getCurrentUser } from '../../services/authService';
 
 export default function GestaoDashboard({ initialSubTab = 'dashboard' }) {
   const [activeSubTab, setActiveSubTab] = useState(initialSubTab);
@@ -30,8 +31,23 @@ export default function GestaoDashboard({ initialSubTab = 'dashboard' }) {
         db.pendencias.toArray(),
         db.rotinas.toArray()
       ]);
-      setPendencias(allPendencias);
-      setRotinas(allRotinas);
+
+      const current = getCurrentUser();
+      const userLogin = current?.login || 'Saulo';
+      const isMaster = userLogin.toLowerCase() === 'saulo';
+
+      const userPendencias = allPendencias.filter(p => {
+        if (isMaster) return !p.usuario || p.usuario === 'Saulo' || p.usuario === userLogin;
+        return p.usuario === userLogin;
+      });
+
+      const userRotinas = allRotinas.filter(r => {
+        if (isMaster) return !r.usuario || r.usuario === 'Saulo' || r.usuario === userLogin;
+        return r.usuario === userLogin;
+      });
+
+      setPendencias(userPendencias);
+      setRotinas(userRotinas);
     } catch (err) {
       console.error('Erro ao carregar dashboard de gestão:', err);
     } finally {

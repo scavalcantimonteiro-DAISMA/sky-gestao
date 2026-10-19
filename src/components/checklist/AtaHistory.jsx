@@ -7,6 +7,7 @@ import { db } from '../../db';
 import { generateAtaPDF } from '../../services/pdfGenerator';
 import { openOutlookEmailForAta, openWhatsAppAta, formatDateBR } from '../../services/outlookService';
 import { syncToCloudNow } from '../../services/cloudSyncService';
+import { getCurrentUser } from '../../services/authService';
 import AtaSummaryModal from './AtaSummaryModal';
 
 export default function AtaHistory({ onNewChecklist }) {
@@ -18,10 +19,14 @@ export default function AtaHistory({ onNewChecklist }) {
   const loadAtas = async () => {
     setLoading(true);
     try {
+      const currentUser = getCurrentUser();
+      const userLogin = currentUser ? currentUser.login : 'Saulo';
       const allAtas = await db.atas.toArray();
+      // Filtra para exibir apenas as atas do usuário atual (ou legadas sem usuário para Saulo)
+      const userAtas = allAtas.filter((a) => !a.usuario || a.usuario === userLogin);
       // Ordena por data mais recente
-      allAtas.sort((a, b) => new Date(b.dataVisita || b.createdAt) - new Date(a.dataVisita || a.createdAt));
-      setAtas(allAtas);
+      userAtas.sort((a, b) => new Date(b.dataVisita || b.createdAt) - new Date(a.dataVisita || a.createdAt));
+      setAtas(userAtas);
     } catch (err) {
       console.error('Erro ao carregar histórico:', err);
     } finally {
