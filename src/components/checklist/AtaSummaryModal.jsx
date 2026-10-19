@@ -148,7 +148,14 @@ export default function AtaSummaryModal({ ata, onClose, onAtaSaved }) {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
             <div>
               <span className="text-xs text-slate-400 block font-medium">Credenciado</span>
-              <strong className="text-slate-900">{ata.credenciado}</strong>
+              <strong className="text-slate-900 flex items-center gap-1.5 flex-wrap">
+                {ata.credenciado}
+                {ata.pdv && (
+                  <span className="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.2 rounded font-black">
+                    {ata.pdv}
+                  </span>
+                )}
+              </strong>
             </div>
             <div>
               <span className="text-xs text-slate-400 block font-medium">Cidade</span>

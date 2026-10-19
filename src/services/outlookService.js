@@ -25,7 +25,7 @@ export function formatAtaEmailBody(ata) {
 
   return `ATA DE REUNIÃO E CHECKLIST DE VISITA - SKY BRASIL
 =============================================================
-Credenciado: ${ata.credenciado}
+Credenciado: ${ata.credenciado}${ata.pdv ? ` (PDV: ${ata.pdv})` : ''}
 Cidade: ${ata.cidade}
 Data da Visita: ${dataFormatada}
 Supervisor de Campo: ${ata.supervisor || 'Supervisor SKY'}

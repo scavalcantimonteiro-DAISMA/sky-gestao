@@ -43,6 +43,22 @@ export default function StepVendas({ data, onChange }) {
         </p>
       </div>
 
+      {data.pdv && (
+        <div className="p-3.5 rounded-2xl bg-gradient-to-r from-rose-50 to-amber-50 border border-rose-200 text-xs text-rose-900 font-medium flex items-center justify-between gap-2 shadow-sm animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <span className="font-extrabold px-2 py-0.5 rounded-md bg-rose-600 text-white text-[10px] tracking-wider">
+              PDV {data.pdv}
+            </span>
+            <span>
+              Produção de vendas pré-carregada automaticamente da base do <strong>Projeto SKY</strong> para <strong>{data.credenciado}</strong>.
+            </span>
+          </div>
+          <span className="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full shrink-0">
+            Sincronizado
+          </span>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Quantas vendas de Pós? */}
         <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-1.5">

@@ -42,19 +42,45 @@ export default function StepProprietario({ data, onChange }) {
         </p>
       </div>
 
+      {data.pdv && (
+        <div className="p-3.5 rounded-2xl bg-gradient-to-r from-rose-50 to-amber-50 border border-rose-200 text-xs text-rose-900 font-medium flex items-center justify-between gap-2 shadow-sm animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <span className="font-extrabold px-2 py-0.5 rounded-md bg-rose-600 text-white text-[10px] tracking-wider">
+              PDV {data.pdv}
+            </span>
+            <span>
+              Indicadores carregados automaticamente da base do <strong>Projeto SKY</strong> para <strong>{data.credenciado}</strong>.
+            </span>
+          </div>
+          <span className="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full shrink-0">
+            Sincronizado
+          </span>
+        </div>
+      )}
+
       {/* Indicadores de Serviços */}
       <div>
-        <h4 className="text-sm font-bold uppercase tracking-wider text-rose-700 mb-3 flex items-center gap-1.5">
-          <Activity className="w-4 h-4" />
-          Indicadores de Serviços
-        </h4>
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-sm font-bold uppercase tracking-wider text-rose-700 flex items-center gap-1.5">
+            <Activity className="w-4 h-4" />
+            Indicadores de Serviços (Metas Oficiais SKY)
+          </h4>
+          <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
+            Metas: TA.AT ≥ 80% • TA.PP ≥ 90% • Retiradas ≥ 70% • Reabertura ≤ 3,5%
+          </span>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* T.A de AT */}
           <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-1.5">
-            <label className="block text-sm font-semibold text-slate-800">
-              Indicador T.A de AT
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-sm font-semibold text-slate-800">
+                Indicador T.A de AT
+              </label>
+              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-slate-200 text-slate-700">
+                Meta: ≥ 80%
+              </span>
+            </div>
             <input
               type="text"
               value={prop.indicadorTaAt || ''}
@@ -62,14 +88,19 @@ export default function StepProprietario({ data, onChange }) {
               placeholder="Ex: 94.2% ou 2.1 dias"
               className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-slate-900 bg-white font-bold text-base"
             />
-            <span className="text-xs text-slate-400">Tempo/Taxa de Atendimento AT</span>
+            <span className="text-xs text-slate-400 block">Tempo/Taxa de Atendimento AT Corretiva</span>
           </div>
 
           {/* T.A de PP */}
           <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-1.5">
-            <label className="block text-sm font-semibold text-slate-800">
-              Indicador T.A de PP
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-sm font-semibold text-slate-800">
+                Indicador T.A de PP
+              </label>
+              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-slate-200 text-slate-700">
+                Meta: ≥ 90%
+              </span>
+            </div>
             <input
               type="text"
               value={prop.indicadorTaPp || ''}
@@ -77,14 +108,19 @@ export default function StepProprietario({ data, onChange }) {
               placeholder="Ex: 96% ou 1.8 dias"
               className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-slate-900 bg-white font-bold text-base"
             />
-            <span className="text-xs text-slate-400">Tempo/Taxa de Atendimento PP</span>
+            <span className="text-xs text-slate-400 block">Tempo/Taxa de Atendimento PP</span>
           </div>
 
           {/* Indicador de Retiradas */}
           <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-1.5">
-            <label className="block text-sm font-semibold text-slate-800">
-              Indicador de Retiradas
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-sm font-semibold text-slate-800">
+                Indicador de Retiradas
+              </label>
+              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-slate-200 text-slate-700">
+                Meta: ≥ 70%
+              </span>
+            </div>
             <input
               type="text"
               value={prop.indicadorRetiradas || ''}
@@ -92,15 +128,20 @@ export default function StepProprietario({ data, onChange }) {
               placeholder="Ex: 87% da meta"
               className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-slate-900 bg-white font-bold text-base"
             />
-            <span className="text-xs text-slate-400">Eficiência de recolhimento</span>
+            <span className="text-xs text-slate-400 block">Eficiência de recolhimento de equipamentos</span>
           </div>
 
           {/* Reabertura de AT */}
           <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-1.5">
-            <label className="block text-sm font-semibold text-slate-800 flex items-center gap-1.5">
-              <RotateCcw className="w-4 h-4 text-amber-600" />
-              Reabertura de AT
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-sm font-semibold text-slate-800 flex items-center gap-1.5">
+                <RotateCcw className="w-4 h-4 text-amber-600" />
+                Reabertura de AT
+              </label>
+              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-slate-200 text-slate-700">
+                Meta: ≤ 3,5%
+              </span>
+            </div>
             <input
               type="text"
               value={prop.indicadorReaberturaAt || ''}
@@ -108,15 +149,20 @@ export default function StepProprietario({ data, onChange }) {
               placeholder="Ex: 4.5% (meta &lt; 5%)"
               className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-slate-900 bg-white font-bold text-base"
             />
-            <span className="text-xs text-slate-400">Índice de reincidência de reparo</span>
+            <span className="text-xs text-slate-400 block">Índice de reincidência de reparo</span>
           </div>
 
           {/* Reabertura de PP */}
           <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-1.5">
-            <label className="block text-sm font-semibold text-slate-800 flex items-center gap-1.5">
-              <RotateCcw className="w-4 h-4 text-amber-600" />
-              Reabertura de PP
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-sm font-semibold text-slate-800 flex items-center gap-1.5">
+                <RotateCcw className="w-4 h-4 text-amber-600" />
+                Reabertura de PP
+              </label>
+              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-slate-200 text-slate-700">
+                Meta: ≤ 2,5%
+              </span>
+            </div>
             <input
               type="text"
               value={prop.indicadorReaberturaPp || ''}
@@ -124,7 +170,7 @@ export default function StepProprietario({ data, onChange }) {
               placeholder="Ex: 2.1%"
               className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-slate-900 bg-white font-bold text-base"
             />
-            <span className="text-xs text-slate-400">Reabertura de instalação</span>
+            <span className="text-xs text-slate-400 block">Reabertura de instalação</span>
           </div>
         </div>
       </div>

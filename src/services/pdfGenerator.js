@@ -37,7 +37,8 @@ export function generateAtaPDF(ata) {
   doc.setFontSize(10);
   doc.text('Credenciado:', 18, 35);
   doc.setFont('helvetica', 'normal');
-  doc.text(ata.credenciado || 'Não informado', 42, 35);
+  const credTexto = ata.pdv ? `${ata.credenciado} (PDV: ${ata.pdv})` : (ata.credenciado || 'Não informado');
+  doc.text(credTexto, 42, 35);
 
   doc.setFont('helvetica', 'bold');
   doc.text('Cidade:', 18, 43);

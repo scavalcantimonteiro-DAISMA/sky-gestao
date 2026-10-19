@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Building2, Radio, Boxes, ShoppingCart, UserCheck, 
   ArrowLeft, ArrowRight, FileCheck, CheckCircle2, RotateCcw
@@ -9,6 +9,7 @@ import StepEstoque from './StepEstoque';
 import StepVendas from './StepVendas';
 import StepProprietario from './StepProprietario';
 import AtaSummaryModal from './AtaSummaryModal';
+import { refreshPdvsFromCloud, applyPdvToFormData } from '../../services/pdvResultsService';
 
 const STEPS = [
   { id: 1, title: 'Credenciado', icon: Building2 },
@@ -23,6 +24,7 @@ export default function ChecklistWizard({ onCompleteChecklist }) {
   const [showSummaryModal, setShowSummaryModal] = useState(false);
 
   const [formData, setFormData] = useState({
+    pdv: '',
     credenciado: '',
     cidade: '',
     dataVisita: new Date().toISOString().split('T')[0],
@@ -73,11 +75,20 @@ export default function ChecklistWizard({ onCompleteChecklist }) {
     }
   });
 
+  useEffect(() => {
+    // Atualiza base de PDVs silenciosamente em segundo plano caso haja internet
+    refreshPdvsFromCloud();
+  }, []);
+
   const handleFieldChange = (field, value) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleAutoFillPdv = (pdvItem) => {
+    setFormData((prev) => applyPdvToFormData(pdvItem, prev));
   };
 
   const handleNext = () => {
@@ -111,6 +122,7 @@ export default function ChecklistWizard({ onCompleteChecklist }) {
   const handleReset = () => {
     if (window.confirm('Deseja limpar todos os campos e iniciar um novo checklist em branco?')) {
       setFormData({
+        pdv: '',
         credenciado: '',
         cidade: '',
         dataVisita: new Date().toISOString().split('T')[0],
@@ -238,7 +250,11 @@ export default function ChecklistWizard({ onCompleteChecklist }) {
         )}
 
         {currentStep === 1 && (
-          <StepCredenciado data={formData} onChange={handleFieldChange} />
+          <StepCredenciado 
+            data={formData} 
+            onChange={handleFieldChange} 
+            onAutoFillPdv={handleAutoFillPdv}
+          />
         )}
         {currentStep === 2 && (
           <StepTorreControle data={formData} onChange={handleFieldChange} />
