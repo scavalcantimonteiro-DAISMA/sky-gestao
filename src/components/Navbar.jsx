@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ClipboardList, Clock, Bell, Home, CheckCircle2, Menu, X, Smartphone, Database, RefreshCw, CloudCheck, Users, LogOut } from 'lucide-react';
+import { 
+  ClipboardList, Clock, Bell, Home, CheckCircle2, Menu, X, 
+  Smartphone, Database, RefreshCw, CloudCheck, Users, LogOut, Download 
+} from 'lucide-react';
 import {
   requestNotificationPermission,
   showNativeNotification,
@@ -9,7 +12,7 @@ import {
 } from '../services/notificationService';
 import { syncToCloudNow, pullFromCloudNow, isDesktopDevice } from '../services/cloudSyncService';
 
-export default function Navbar({ currentTab, setCurrentTab, onOpenBackup, onOpenNtfy, currentUser, onLogout }) {
+export default function Navbar({ currentTab, setCurrentTab, onOpenBackup, onOpenNtfy, onOpenInstallApp, currentUser, onLogout }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [syncStatus, setSyncStatus] = useState('synced'); // 'synced' | 'syncing' | 'error'
   const [notifActive, setNotifActive] = useState(() => {
@@ -170,6 +173,16 @@ export default function Navbar({ currentTab, setCurrentTab, onOpenBackup, onOpen
             <span>Push Celular</span>
           </button>
 
+          {/* Botão Baixar no Celular */}
+          <button
+            onClick={onOpenInstallApp}
+            title="Baixar e Instalar o App no Celular (Android e iPhone)"
+            className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 border border-emerald-500/40 transition flex items-center gap-1.5 cursor-pointer shadow-sm"
+          >
+            <Download className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Baixar no Celular</span>
+          </button>
+
           {/* Botão de Notificação Local + Push */}
           <button
             onClick={handleRequestNotif}
@@ -208,6 +221,15 @@ export default function Navbar({ currentTab, setCurrentTab, onOpenBackup, onOpen
 
         {/* Mobile Menu Button */}
         <div className="flex items-center gap-1.5 md:hidden">
+          <button
+            onClick={onOpenInstallApp}
+            className="px-2 py-1.5 rounded-lg text-xs font-bold text-emerald-300 hover:text-white bg-emerald-950/70 border border-emerald-700/60 flex items-center gap-1 cursor-pointer"
+            title="Baixar App no Celular"
+          >
+            <Download className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="text-[11px] font-bold">Baixar</span>
+          </button>
+
           <button
             onClick={handleManualSync}
             className="p-2 rounded-lg text-sky-300 hover:text-white bg-sky-950/60 border border-sky-800"
@@ -310,6 +332,14 @@ export default function Navbar({ currentTab, setCurrentTab, onOpenBackup, onOpen
               Gestão da Equipe (Admin)
             </button>
           )}
+
+          <button
+            onClick={() => { onOpenInstallApp(); setMobileMenuOpen(false); }}
+            className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2.5 bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 border border-emerald-500/30"
+          >
+            <Download className="w-4 h-4 text-emerald-400" />
+            Baixar App no Celular (Instalar)
+          </button>
 
           <button
             onClick={() => { onOpenBackup(); setMobileMenuOpen(false); }}

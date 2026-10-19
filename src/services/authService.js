@@ -86,7 +86,10 @@ export function getLocalUsers() {
     const cached = localStorage.getItem(LOCAL_USERS_KEY);
     if (cached) {
       const parsed = JSON.parse(cached);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const clean = parsed.filter((u) => u && typeof u === 'object' && u.login);
+        if (clean.length > 0) return clean;
+      }
     }
   } catch (e) {
     console.warn('Erro ao ler usuários do cache:', e);
@@ -100,7 +103,8 @@ export function getLocalUsers() {
 export function saveLocalUsers(users) {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(users));
+    const valid = Array.isArray(users) ? users.filter((u) => u && typeof u === 'object' && u.login) : [MASTER_ADMIN];
+    localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(valid));
   } catch (e) {
     console.warn('Erro ao salvar usuários no cache:', e);
   }
@@ -114,7 +118,8 @@ export function getCurrentUser() {
   try {
     const raw = localStorage.getItem(CURRENT_USER_KEY);
     if (raw) {
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.login) return parsed;
     }
   } catch (e) {
     console.warn('Erro ao ler sessão atual:', e);
@@ -128,7 +133,7 @@ export function getCurrentUser() {
 export function setCurrentUser(user, remember = true) {
   if (typeof window === 'undefined') return;
   try {
-    if (user) {
+    if (user && user.login) {
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
       localStorage.setItem(REMEMBER_ME_KEY, remember ? 'true' : 'false');
       window.dispatchEvent(new CustomEvent('sky-auth-changed', { detail: { user } }));
@@ -171,11 +176,14 @@ export async function syncUsersWithCloud() {
 
     const cloudUsers = [];
     snap.forEach((d) => {
-      cloudUsers.push(d.data());
+      const u = d.data();
+      if (u && typeof u === 'object' && u.login) {
+        cloudUsers.push(u);
+      }
     });
 
     // Garante que o Saulo sempre existe
-    const hasAdmin = cloudUsers.some((u) => u.login.toLowerCase() === MASTER_ADMIN.login.toLowerCase());
+    const hasAdmin = cloudUsers.some((u) => u.login && u.login.toLowerCase() === MASTER_ADMIN.login.toLowerCase());
     if (!hasAdmin) {
       const adminDocRef = doc(fs, USERS_COLLECTION, MASTER_ADMIN.login.toLowerCase());
       await setDoc(adminDocRef, MASTER_ADMIN);
@@ -198,8 +206,8 @@ export async function initAuth() {
   const current = getCurrentUser();
 
   // Se já houver sessão gravada, valida se o usuário ainda está ativo
-  if (current) {
-    const valid = users.find((u) => u.login.toLowerCase() === current.login.toLowerCase());
+  if (current && current.login) {
+    const valid = users.find((u) => u && u.login && u.login.toLowerCase() === current.login.toLowerCase());
     if (valid && valid.ativo) {
       setCurrentUser(valid, localStorage.getItem(REMEMBER_ME_KEY) === 'true');
       return valid;
@@ -347,7 +355,7 @@ export async function createUser({ nome, login, cargo }) {
   }
 
   const users = getLocalUsers();
-  if (users.some((u) => u.login.toLowerCase() === cleanLogin)) {
+  if (users.some((u) => u && u.login && u.login.toLowerCase() === cleanLogin)) {
     return { success: false, reason: `Já existe um usuário com o login "${cleanLogin}".` };
   }
 

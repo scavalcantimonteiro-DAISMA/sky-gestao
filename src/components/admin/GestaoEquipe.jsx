@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Users, UserPlus, KeyRound, CheckCircle2, AlertTriangle, ShieldCheck, 
-  Search, FileText, ClipboardList, Clock, RefreshCw, Smartphone, Eye
+  Search, FileText, ClipboardList, Clock, RefreshCw, Smartphone, Eye, Power
 } from 'lucide-react';
 import { db } from '../../db';
 import { 
@@ -95,24 +95,39 @@ export default function GestaoEquipe({ currentUser }) {
     }
 
     setSubmittingUser(true);
-    const res = await createUser({
-      nome: novoNome.trim(),
-      login: novoLogin.trim(),
-      cargo: novoCargo.trim()
-    });
-    setSubmittingUser(false);
-
-    if (res.success) {
-      setFormFeedback({
-        type: 'success',
-        message: `Colaborador "${res.user.nome}" cadastrado com sucesso! Login: ${res.user.login} | Senha provisória: 1234`
+    try {
+      const res = await createUser({
+        nome: novoNome.trim(),
+        login: novoLogin.trim(),
+        cargo: novoCargo.trim()
       });
-      setNovoNome('');
-      setNovoLogin('');
-      setNovoCargo('Supervisor de Campo');
-      loadUsersList();
-    } else {
-      setFormFeedback({ type: 'error', message: res.reason || 'Erro ao criar usuário.' });
+
+      if (res.success && res.user) {
+        setFormFeedback({
+          type: 'success',
+          message: `Colaborador "${res.user.nome}" cadastrado com sucesso! Login: ${res.user.login} | Senha provisória: 1234`
+        });
+        setNovoNome('');
+        setNovoLogin('');
+        setNovoCargo('Supervisor de Campo');
+
+        // Atualiza estado local imediatamente com o novo usuário
+        setUsers((prev) => {
+          const list = Array.isArray(prev) ? prev : [];
+          const filtered = list.filter((x) => x && x.login && x.login.toLowerCase() !== res.user.login.toLowerCase());
+          return [...filtered, res.user];
+        });
+
+        // Sincroniza em segundo plano
+        loadUsersList().catch(() => {});
+      } else {
+        setFormFeedback({ type: 'error', message: res.reason || 'Erro ao criar usuário.' });
+      }
+    } catch (err) {
+      console.error('Erro ao cadastrar usuário:', err);
+      setFormFeedback({ type: 'error', message: 'Ocorreu um erro ao salvar o colaborador: ' + (err.message || err) });
+    } finally {
+      setSubmittingUser(false);
     }
   };
 
@@ -341,14 +356,18 @@ export default function GestaoEquipe({ currentUser }) {
 
             <div className="divide-y divide-slate-100">
               {users.map((u) => {
-                const isAdmin = u.role === 'ADMIN' || u.login.toLowerCase() === 'saulo';
+                if (!u || !u.login) return null;
+                const loginLower = (u.login || '').toLowerCase();
+                const isAdmin = u.role === 'ADMIN' || loginLower === 'saulo';
+                const displayName = u.nome || u.login || 'Usuário';
+                const initials = displayName.trim().slice(0, 2).toUpperCase();
                 return (
                   <div key={u.login} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-black text-sm text-white shadow-sm ${
                         isAdmin ? 'bg-gradient-to-tr from-rose-600 to-red-500' : 'bg-gradient-to-tr from-indigo-600 to-blue-500'
                       }`}>
-                        {u.nome ? u.nome.slice(0, 2).toUpperCase() : u.login.slice(0, 2).toUpperCase()}
+                        {initials}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
@@ -442,7 +461,7 @@ export default function GestaoEquipe({ currentUser }) {
                 className="px-3 py-2 rounded-xl border border-slate-300 font-semibold text-slate-800 text-xs focus:ring-2 focus:ring-indigo-500 bg-slate-50"
               >
                 <option value="TODOS">Todos os Colaboradores ({allAtas.length})</option>
-                {users.map((u) => {
+                {users.filter((u) => u && u.login).map((u) => {
                   const count = allAtas.filter((a) => (a.usuario || 'Saulo') === u.login).length;
                   return (
                     <option key={u.login} value={u.login}>
@@ -559,7 +578,7 @@ export default function GestaoEquipe({ currentUser }) {
                 className="px-3 py-2 rounded-xl border border-slate-300 font-semibold text-slate-800 text-xs focus:ring-2 focus:ring-indigo-500 bg-slate-50"
               >
                 <option value="TODOS">Todos ({allPendencias.length})</option>
-                {users.map((u) => {
+                {users.filter((u) => u && u.login).map((u) => {
                   const count = allPendencias.filter((p) => (p.usuario || 'Saulo') === u.login).length;
                   return (
                     <option key={u.login} value={u.login}>
