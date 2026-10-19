@@ -1,7 +1,8 @@
-import { SKY_PDVS_DATA, SKY_PDVS_METADATA } from '../data/skyPdvResultsData';
+import { SKY_PDVS_DATA, SKY_PDVS_METADATA } from '../data/skyPdvResultsData.js';
 
 const CACHE_KEY = 'sky_pdv_results_cache_v1';
 const CACHE_META_KEY = 'sky_pdv_results_meta_v1';
+const CACHE_BKL_META_KEY = 'sky_bkl_meta_v1';
 
 // Metas Oficiais SKY Brasil
 export const TARGETS = {
@@ -22,6 +23,84 @@ export function normalizeSearchTerm(term) {
     .replace(/[\u0300-\u036f]/g, '')
     .trim()
     .toUpperCase();
+}
+
+/**
+ * Processa as linhas de um snapshot de BKL e mapeia por PDV e por credenciado
+ */
+export function parseBklRows(rows, snapshotDate) {
+  const bklMap = new Map();
+
+  rows.forEach((r) => {
+    const f = r.mapValue?.fields || {};
+    const pdv = (f.pdv?.stringValue || '').trim().toUpperCase();
+    const cred = (f.credenciado?.stringValue || '').trim();
+    const serv = (f.servico?.stringValue || '').trim().toUpperCase();
+    const ct = Number(f.ct?.integerValue ?? 0);
+
+    const primaryKey = pdv || normalizeSearchTerm(cred);
+    if (!primaryKey) return;
+
+    if (!bklMap.has(primaryKey)) {
+      bklMap.set(primaryKey, {
+        pdv,
+        credenciado: cred,
+        data: snapshotDate,
+        ac: 0,
+        pp: 0,
+        outros: 0,
+        total: 0,
+        vencidas: 0,
+        vencidasAc: 0,
+        vencidasPp: 0,
+        maxCt: 0
+      });
+    }
+
+    const item = bklMap.get(primaryKey);
+    item.total++;
+    if (ct > item.maxCt) item.maxCt = ct;
+
+    const isAc = serv === 'AC' || serv === 'AT';
+    const isPp = serv === 'PP' || serv === 'PS';
+
+    if (isAc) {
+      item.ac++;
+      if (ct > 0) item.vencidasAc++;
+    } else if (isPp) {
+      item.pp++;
+      if (ct > 0) item.vencidasPp++;
+    } else {
+      item.outros++;
+    }
+
+    if (ct > 0) {
+      item.vencidas++;
+    }
+  });
+
+  // Calcula tipoVencidas e cria chaves secundárias para busca rápida
+  bklMap.forEach((item) => {
+    if (item.vencidasAc > 0 && item.vencidasPp > 0) {
+      item.tipoVencidas = 'Ambos';
+    } else if (item.vencidasAc > 0) {
+      item.tipoVencidas = 'AT';
+    } else if (item.vencidasPp > 0) {
+      item.tipoVencidas = 'PP';
+    } else {
+      item.tipoVencidas = 'Nenhuma';
+    }
+
+    // Se tiver nome de credenciado, indexa também pelo nome normalizado
+    if (item.credenciado) {
+      const credKey = normalizeSearchTerm(item.credenciado);
+      if (!bklMap.has(credKey)) {
+        bklMap.set(credKey, item);
+      }
+    }
+  });
+
+  return bklMap;
 }
 
 /**
@@ -134,7 +213,7 @@ export function getPdvByCode(code) {
 }
 
 /**
- * Aplica os resultados do PDV ao formulário da Ata de Reunião
+ * Aplica os resultados do PDV (Resultados + BKL) ao formulário da Ata de Reunião
  */
 export function applyPdvToFormData(pdvItem, prevFormData) {
   if (!pdvItem) return prevFormData;
@@ -153,11 +232,27 @@ export function applyPdvToFormData(pdvItem, prevFormData) {
   const vSeg = Number(pdvItem.vendasSeguro ?? 0);
   const retiradasAbertas = pdvItem.abertasRetiradasVig ? String(pdvItem.abertasRetiradasVig) : '';
 
+  // Extrai dados de BKL (Backlog O.S.s) se disponíveis
+  const bkl = pdvItem.bkl || null;
+  const temVencidas = bkl ? bkl.vencidas > 0 : prevFormData.torreControle.temOsVencidas;
+  const qtdVenc = bkl ? (bkl.vencidas > 0 ? bkl.vencidas : 0) : prevFormData.torreControle.qtdVencidas;
+  const tipoVenc = bkl && bkl.vencidas > 0
+    ? (bkl.tipoVencidas === 'Nenhuma' ? 'PP' : bkl.tipoVencidas)
+    : prevFormData.torreControle.tipoVencidas;
+
   return {
     ...prevFormData,
     pdv: pdvItem.pdv,
     credenciado: pdvItem.credenciado || pdvItem.pdv,
     cidade: pdvItem.cidade || (pdvItem.estado ? `${pdvItem.estado} - Regional` : prevFormData.cidade),
+    torreControle: {
+      ...prevFormData.torreControle,
+      osAtCaixa: bkl ? Number(bkl.ac ?? 0) : prevFormData.torreControle.osAtCaixa,
+      osPpCaixa: bkl ? Number(bkl.pp ?? 0) : prevFormData.torreControle.osPpCaixa,
+      temOsVencidas: temVencidas,
+      qtdVencidas: qtdVenc,
+      tipoVencidas: tipoVenc
+    },
     estoque: {
       ...prevFormData.estoque,
       retiradasDia: retiradasAbertas || prevFormData.estoque.retiradasDia
@@ -207,27 +302,83 @@ export function getPdvMetadata() {
 }
 
 /**
- * Atualiza os resultados de PDVs em tempo real consultando a planilha mais recente 
- * do projeto SKY Correto salva no Firebase Firestore.
+ * Retorna os metadados do último snapshot de BKL
+ */
+export function getBklMetadata() {
+  if (typeof window !== 'undefined') {
+    try {
+      const cached = localStorage.getItem(CACHE_BKL_META_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && typeof parsed === 'object') return parsed;
+      }
+    } catch (e) {
+      console.warn('Erro ao ler metadados de BKL:', e);
+    }
+  }
+  return null;
+}
+
+/**
+ * Atualiza os resultados de PDVs e BKL em tempo real consultando:
+ * 1. A planilha de resultados mais recente (dadosPlanilha/principal)
+ * 2. O snapshot de BKL mais recente (bklSnapshots)
  * Totalmente resiliente offline: se falhar ou sem rede, mantém os dados salvos localmente.
  */
 export async function refreshPdvsFromCloud() {
   try {
-    // Adiciona timestamp para desabilitar cache de proxy ou do navegador
-    const url = `https://firestore.googleapis.com/v1/projects/resultado-credenciados/databases/(default)/documents/dadosPlanilha/principal?t=${Date.now()}`;
-    const res = await fetch(url, {
-      cache: 'no-store',
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
+    const timestamp = Date.now();
+    const urlPlanilha = `https://firestore.googleapis.com/v1/projects/resultado-credenciados/databases/(default)/documents/dadosPlanilha/principal?t=${timestamp}`;
+    const urlBkl = `https://firestore.googleapis.com/v1/projects/resultado-credenciados/databases/(default)/documents:runQuery?t=${timestamp}`;
 
-    if (!res.ok) {
-      console.warn('Aviso: Não foi possível obter dados da nuvem. Código:', res.status);
-      return { success: false, reason: `HTTP ${res.status}` };
+    // Dispara requisições simultâneas com tolerância a falhas
+    const [resPlanilha, resBkl] = await Promise.all([
+      fetch(urlPlanilha, { cache: 'no-store', headers: { 'Accept': 'application/json' } }).catch(() => null),
+      fetch(urlBkl, {
+        method: 'POST',
+        cache: 'no-store',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          structuredQuery: {
+            from: [{ collectionId: 'bklSnapshots' }],
+            orderBy: [{ field: { fieldPath: 'data' }, direction: 'DESCENDING' }],
+            limit: 1
+          }
+        })
+      }).catch(() => null)
+    ]);
+
+    // 1. Processa BKL se disponível
+    let bklMap = new Map();
+    let bklMeta = null;
+    if (resBkl && resBkl.ok) {
+      try {
+        const bklJson = await resBkl.json();
+        if (Array.isArray(bklJson) && bklJson.length > 0 && bklJson[0]?.document) {
+          const bDoc = bklJson[0].document;
+          const bRows = bDoc.fields?.rows?.arrayValue?.values || [];
+          const bData = bDoc.fields?.data?.stringValue || new Date().toISOString().split('T')[0];
+          const bTotal = Number(bDoc.fields?.totalOS?.integerValue ?? bRows.length);
+          bklMeta = {
+            data: bData,
+            totalOS: bTotal,
+            syncedAt: new Date().toISOString()
+          };
+          bklMap = parseBklRows(bRows, bData);
+          localStorage.setItem(CACHE_BKL_META_KEY, JSON.stringify(bklMeta));
+        }
+      } catch (errBkl) {
+        console.warn('Aviso: Falha ao interpretar BKL da nuvem:', errBkl);
+      }
     }
 
-    const doc = await res.json();
+    // 2. Processa Planilha Principal de Resultados
+    if (!resPlanilha || !resPlanilha.ok) {
+      console.warn('Aviso: Planilha principal indisponível na nuvem.');
+      return { success: false, reason: 'Planilha principal indisponível' };
+    }
+
+    const doc = await resPlanilha.json();
     const rows = doc.fields?.rows?.arrayValue?.values || [];
     if (!rows.length) {
       return { success: false, reason: 'Nenhuma linha encontrada na planilha da nuvem' };
@@ -254,6 +405,10 @@ export async function refreshPdvsFromCloud() {
       };
 
       const existing = map.get(pdv) || { pdv, credenciado: pdv, estado: '', cidade: '' };
+      
+      // Vincula BKL correspondente por código de PDV ou credenciado
+      const bklInfo = bklMap.get(pdv) || bklMap.get(normalizeSearchTerm(existing.credenciado)) || null;
+
       map.set(pdv, {
         ...existing,
         taAtVig: getNum('TA.AT PÓS MÊS VIRGENTE') ?? existing.taAtVig,
@@ -266,7 +421,8 @@ export async function refreshPdvsFromCloud() {
         vendasNp: getNum('EQUIP_APONTADOS') ?? existing.vendasNp,
         vendasChip: getNum('SKY_MOVEL') ?? existing.vendasChip,
         vendasSeguro: getNum('VND_SEGUROS') ?? existing.vendasSeguro,
-        pctPos: getNum('%_POS') ?? existing.pctPos
+        pctPos: getNum('%_POS') ?? existing.pctPos,
+        bkl: bklInfo || existing.bkl || null
       });
     });
 
@@ -275,6 +431,8 @@ export async function refreshPdvsFromCloud() {
       updatedAt,
       sourceName,
       totalPdvs: updated.length,
+      bklData: bklMeta?.data || null,
+      bklTotalOS: bklMeta?.totalOS || 0,
       syncedAt: new Date().toISOString()
     };
 
@@ -288,7 +446,7 @@ export async function refreshPdvsFromCloud() {
 
     return { success: true, meta, count: updated.length };
   } catch (err) {
-    console.warn('Erro ao atualizar PDVs da nuvem (usando dados locais):', err);
+    console.warn('Erro ao atualizar dados da nuvem (usando dados locais):', err);
     return { success: false, reason: err.message };
   }
 }

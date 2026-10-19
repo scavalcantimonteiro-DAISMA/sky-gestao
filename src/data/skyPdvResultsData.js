@@ -1,7 +1,9 @@
 export const SKY_PDVS_METADATA = {
   "sourceName": "Resultados atualizados.xlsx",
   "updatedAt": "2026-10-16T20:43:51.387Z",
-  "totalPdvs": 111
+  "totalPdvs": 111,
+  "bklData": "2026-10-19",
+  "bklTotalOS": 864
 };
 
 export const SKY_PDVS_DATA = [
@@ -28,7 +30,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 5.1037,
     "pctPos": 0.7837451260849971,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "D401015",
+      "credenciado": "PROJETEC TELECOM",
+      "data": "2026-10-19",
+      "ac": 12,
+      "pp": 16,
+      "outros": 2,
+      "total": 30,
+      "vencidas": 13,
+      "vencidasAc": 1,
+      "vencidasPp": 12,
+      "maxCt": 15,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "D409401",
@@ -53,7 +69,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "D409401",
+      "credenciado": "SATELITE SAT",
+      "data": "2026-10-19",
+      "ac": 0,
+      "pp": 6,
+      "outros": 0,
+      "total": 6,
+      "vencidas": 4,
+      "vencidasAc": 0,
+      "vencidasPp": 4,
+      "maxCt": 10,
+      "tipoVencidas": "PP"
+    }
   },
   {
     "pdv": "ID01339",
@@ -78,7 +108,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "ID01701",
@@ -103,7 +134,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "ID90144",
@@ -128,7 +160,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0.47024744420514075,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "ID90144",
+      "credenciado": "MUNDO DAS ANTENAS",
+      "data": "2026-10-19",
+      "ac": 1,
+      "pp": 2,
+      "outros": 0,
+      "total": 3,
+      "vencidas": 3,
+      "vencidasAc": 1,
+      "vencidasPp": 2,
+      "maxCt": 46,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "ID91638",
@@ -153,7 +199,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 5.1037,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "ID91638",
+      "credenciado": "BUCK SAT",
+      "data": "2026-10-19",
+      "ac": 6,
+      "pp": 6,
+      "outros": 0,
+      "total": 12,
+      "vencidas": 11,
+      "vencidasAc": 6,
+      "vencidasPp": 5,
+      "maxCt": 9,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "ID91704",
@@ -178,7 +238,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 5.1037,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "ID93316",
@@ -203,7 +264,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "ID93316",
+      "credenciado": "CASA DAS PARABOLICAS",
+      "data": "2026-10-19",
+      "ac": 0,
+      "pp": 0,
+      "outros": 2,
+      "total": 2,
+      "vencidas": 2,
+      "vencidasAc": 0,
+      "vencidasPp": 0,
+      "maxCt": 63,
+      "tipoVencidas": "Nenhuma"
+    }
   },
   {
     "pdv": "ID93517",
@@ -228,7 +303,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0.47024744420514075,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V401802",
@@ -253,7 +329,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V406060",
@@ -278,7 +355,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 5.1037,
     "pctPos": 0.5878088445637479,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V409005",
@@ -303,7 +381,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V416019",
@@ -328,7 +407,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": null,
     "pctPos": null,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V416019",
+      "credenciado": "TELEBRAE",
+      "data": "2026-10-19",
+      "ac": 15,
+      "pp": 21,
+      "outros": 6,
+      "total": 42,
+      "vencidas": 38,
+      "vencidasAc": 12,
+      "vencidasPp": 21,
+      "maxCt": 48,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V425703",
@@ -353,7 +446,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 5.1037,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V427001",
@@ -378,7 +472,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 5.1037,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V427001",
+      "credenciado": "ESPACO ELETRONICO PE",
+      "data": "2026-10-19",
+      "ac": 3,
+      "pp": 4,
+      "outros": 0,
+      "total": 7,
+      "vencidas": 5,
+      "vencidasAc": 2,
+      "vencidasPp": 3,
+      "maxCt": 7,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V900122",
@@ -403,7 +511,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": null,
     "pctPos": null,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V416601",
+      "credenciado": "ELETRONICA LEMOS",
+      "data": "2026-10-19",
+      "ac": 1,
+      "pp": 0,
+      "outros": 0,
+      "total": 1,
+      "vencidas": 0,
+      "vencidasAc": 0,
+      "vencidasPp": 0,
+      "maxCt": 0,
+      "tipoVencidas": "Nenhuma"
+    }
   },
   {
     "pdv": "V900195",
@@ -428,7 +550,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V900195",
+      "credenciado": "COMPACT SA",
+      "data": "2026-10-19",
+      "ac": 0,
+      "pp": 3,
+      "outros": 1,
+      "total": 4,
+      "vencidas": 4,
+      "vencidasAc": 0,
+      "vencidasPp": 3,
+      "maxCt": 61,
+      "tipoVencidas": "PP"
+    }
   },
   {
     "pdv": "V900230",
@@ -453,7 +589,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V900467",
@@ -478,7 +615,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V415015",
+      "credenciado": "ANTENAO",
+      "data": "2026-10-19",
+      "ac": 1,
+      "pp": 2,
+      "outros": 2,
+      "total": 5,
+      "vencidas": 5,
+      "vencidasAc": 1,
+      "vencidasPp": 2,
+      "maxCt": 47,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V900471",
@@ -503,7 +654,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V900489",
@@ -528,7 +680,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V900489",
+      "credenciado": "ELETRONICA RADIOLAR",
+      "data": "2026-10-19",
+      "ac": 1,
+      "pp": 1,
+      "outros": 1,
+      "total": 3,
+      "vencidas": 3,
+      "vencidasAc": 1,
+      "vencidasPp": 1,
+      "maxCt": 52,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V900494",
@@ -553,7 +719,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V900494",
+      "credenciado": "SHOPPING DA PARABOLI",
+      "data": "2026-10-19",
+      "ac": 0,
+      "pp": 0,
+      "outros": 1,
+      "total": 1,
+      "vencidas": 1,
+      "vencidasAc": 0,
+      "vencidasPp": 0,
+      "maxCt": 194,
+      "tipoVencidas": "Nenhuma"
+    }
   },
   {
     "pdv": "V900775",
@@ -578,7 +758,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V900788",
@@ -603,7 +784,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": null,
     "pctPos": null,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V901153",
@@ -628,7 +810,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 5.1037,
     "pctPos": 0.39187256304249857,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V901153",
+      "credenciado": "SERVITEC",
+      "data": "2026-10-19",
+      "ac": 2,
+      "pp": 1,
+      "outros": 0,
+      "total": 3,
+      "vencidas": 0,
+      "vencidasAc": 0,
+      "vencidasPp": 0,
+      "maxCt": 0,
+      "tipoVencidas": "Nenhuma"
+    }
   },
   {
     "pdv": "V901188",
@@ -653,7 +849,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V901313",
@@ -678,7 +875,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V901341",
@@ -703,7 +901,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V901351",
@@ -728,7 +927,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 5.1037,
     "pctPos": 0.19593628152124928,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V901351",
+      "credenciado": "LIGCEL",
+      "data": "2026-10-19",
+      "ac": 15,
+      "pp": 19,
+      "outros": 14,
+      "total": 48,
+      "vencidas": 47,
+      "vencidasAc": 15,
+      "vencidasPp": 18,
+      "maxCt": 239,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V901606",
@@ -753,7 +966,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V901740",
@@ -778,7 +992,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V901872",
@@ -803,7 +1018,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 5.1037,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V901872",
+      "credenciado": "MACAZI TELECOMUNICACSERVIÇOS",
+      "data": "2026-10-19",
+      "ac": 31,
+      "pp": 31,
+      "outros": 20,
+      "total": 82,
+      "vencidas": 73,
+      "vencidasAc": 26,
+      "vencidasPp": 29,
+      "maxCt": 49,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V901979",
@@ -828,7 +1057,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V902035",
@@ -853,7 +1083,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "ID91635",
+      "credenciado": "DIGITAL SAT",
+      "data": "2026-10-19",
+      "ac": 5,
+      "pp": 1,
+      "outros": 0,
+      "total": 6,
+      "vencidas": 6,
+      "vencidasAc": 5,
+      "vencidasPp": 1,
+      "maxCt": 94,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V902135",
@@ -878,7 +1122,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 1.4107423326154223,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V902135",
+      "credenciado": "SKYTEC",
+      "data": "2026-10-19",
+      "ac": 2,
+      "pp": 1,
+      "outros": 0,
+      "total": 3,
+      "vencidas": 3,
+      "vencidasAc": 2,
+      "vencidasPp": 1,
+      "maxCt": 7,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V902291",
@@ -903,7 +1161,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V902291",
+      "credenciado": "HDX INSTALACOES",
+      "data": "2026-10-19",
+      "ac": 18,
+      "pp": 13,
+      "outros": 42,
+      "total": 73,
+      "vencidas": 72,
+      "vencidasAc": 18,
+      "vencidasPp": 13,
+      "maxCt": 78,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V902294",
@@ -928,7 +1200,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V902296",
@@ -953,7 +1226,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V902414",
@@ -978,7 +1252,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 7,
     "metaPos": 14.46048,
     "pctPos": 1.037309964814446,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V902414",
+      "credenciado": "ENTER.COM",
+      "data": "2026-10-19",
+      "ac": 10,
+      "pp": 20,
+      "outros": 5,
+      "total": 35,
+      "vencidas": 30,
+      "vencidasAc": 9,
+      "vencidasPp": 17,
+      "maxCt": 41,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V902565",
@@ -1003,7 +1291,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 3,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V902565",
+      "credenciado": "ALTA DEFINICAO SISTEA DE TELECOMUNICACAO",
+      "data": "2026-10-19",
+      "ac": 0,
+      "pp": 1,
+      "outros": 0,
+      "total": 1,
+      "vencidas": 1,
+      "vencidasAc": 0,
+      "vencidasPp": 1,
+      "maxCt": 2,
+      "tipoVencidas": "PP"
+    }
   },
   {
     "pdv": "V902938",
@@ -1028,7 +1330,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V903315",
@@ -1053,7 +1356,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V903315",
+      "credenciado": "DVR SAT",
+      "data": "2026-10-19",
+      "ac": 0,
+      "pp": 5,
+      "outros": 0,
+      "total": 5,
+      "vencidas": 4,
+      "vencidasAc": 0,
+      "vencidasPp": 4,
+      "maxCt": 6,
+      "tipoVencidas": "PP"
+    }
   },
   {
     "pdv": "V903364",
@@ -1078,7 +1395,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V903366",
@@ -1103,7 +1421,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V903375",
@@ -1128,7 +1447,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0.9404948884102815,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V903375",
+      "credenciado": "COMERCIAL NATTAEL",
+      "data": "2026-10-19",
+      "ac": 2,
+      "pp": 0,
+      "outros": 2,
+      "total": 4,
+      "vencidas": 4,
+      "vencidasAc": 2,
+      "vencidasPp": 0,
+      "maxCt": 101,
+      "tipoVencidas": "AT"
+    }
   },
   {
     "pdv": "V903493",
@@ -1153,7 +1486,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V903493",
+      "credenciado": "LOJA TV ATLANTICO TENOLOGIA",
+      "data": "2026-10-19",
+      "ac": 0,
+      "pp": 1,
+      "outros": 0,
+      "total": 1,
+      "vencidas": 1,
+      "vencidasAc": 0,
+      "vencidasPp": 1,
+      "maxCt": 41,
+      "tipoVencidas": "PP"
+    }
   },
   {
     "pdv": "V903753",
@@ -1178,7 +1525,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V903753",
+      "credenciado": "CASA DAS PARABOLICASARAUJO",
+      "data": "2026-10-19",
+      "ac": 16,
+      "pp": 8,
+      "outros": 2,
+      "total": 26,
+      "vencidas": 26,
+      "vencidasAc": 16,
+      "vencidasPp": 8,
+      "maxCt": 71,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V903989",
@@ -1203,7 +1564,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": null,
     "pctPos": null,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V904004",
@@ -1228,7 +1590,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 5.1037,
     "pctPos": 0.39187256304249857,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V904004",
+      "credenciado": "EQUALIZE SOLUÇÕES",
+      "data": "2026-10-19",
+      "ac": 9,
+      "pp": 13,
+      "outros": 3,
+      "total": 25,
+      "vencidas": 23,
+      "vencidasAc": 9,
+      "vencidasPp": 11,
+      "maxCt": 12,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V904236",
@@ -1253,7 +1629,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 3,
     "metaPos": 2.12654,
     "pctPos": 1.4107423326154223,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V904236",
+      "credenciado": "ABSOLUT SKY",
+      "data": "2026-10-19",
+      "ac": 1,
+      "pp": 2,
+      "outros": 1,
+      "total": 4,
+      "vencidas": 4,
+      "vencidasAc": 1,
+      "vencidasPp": 2,
+      "maxCt": 6,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V904527",
@@ -1278,7 +1668,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": null,
     "pctPos": null,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V904746",
@@ -1303,7 +1694,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 5.1037,
     "pctPos": 0.5878088445637479,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V904746",
+      "credenciado": "FULL SATT",
+      "data": "2026-10-19",
+      "ac": 4,
+      "pp": 15,
+      "outros": 4,
+      "total": 23,
+      "vencidas": 18,
+      "vencidasAc": 1,
+      "vencidasPp": 14,
+      "maxCt": 63,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V904764",
@@ -1328,7 +1733,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V904858",
@@ -1353,7 +1759,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V904858",
+      "credenciado": "JANILZA SOUZA",
+      "data": "2026-10-19",
+      "ac": 0,
+      "pp": 1,
+      "outros": 0,
+      "total": 1,
+      "vencidas": 1,
+      "vencidasAc": 0,
+      "vencidasPp": 1,
+      "maxCt": 14,
+      "tipoVencidas": "PP"
+    }
   },
   {
     "pdv": "V904980",
@@ -1378,7 +1798,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 3,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V904980",
+      "credenciado": "JS TECH",
+      "data": "2026-10-19",
+      "ac": 0,
+      "pp": 2,
+      "outros": 0,
+      "total": 2,
+      "vencidas": 0,
+      "vencidasAc": 0,
+      "vencidasPp": 0,
+      "maxCt": 0,
+      "tipoVencidas": "Nenhuma"
+    }
   },
   {
     "pdv": "V905166",
@@ -1403,7 +1837,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": null,
     "pctPos": null,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V905166",
+      "credenciado": "MINAPUTIRA",
+      "data": "2026-10-19",
+      "ac": 1,
+      "pp": 0,
+      "outros": 0,
+      "total": 1,
+      "vencidas": 1,
+      "vencidasAc": 1,
+      "vencidasPp": 0,
+      "maxCt": 6,
+      "tipoVencidas": "AT"
+    }
   },
   {
     "pdv": "V905342",
@@ -1428,7 +1876,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 11.285938660923378,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V905342",
+      "credenciado": "PAJEU ANTENAS",
+      "data": "2026-10-19",
+      "ac": 6,
+      "pp": 6,
+      "outros": 2,
+      "total": 14,
+      "vencidas": 14,
+      "vencidasAc": 6,
+      "vencidasPp": 6,
+      "maxCt": 45,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V905405",
@@ -1453,7 +1915,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0.47024744420514075,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V905405",
+      "credenciado": "NILTON SAT",
+      "data": "2026-10-19",
+      "ac": 3,
+      "pp": 4,
+      "outros": 1,
+      "total": 8,
+      "vencidas": 8,
+      "vencidasAc": 3,
+      "vencidasPp": 4,
+      "maxCt": 34,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V905424",
@@ -1478,7 +1954,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V905484",
@@ -1503,7 +1980,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V905902",
@@ -1528,7 +2006,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V905902",
+      "credenciado": "C. I. ELETRONICA",
+      "data": "2026-10-19",
+      "ac": 1,
+      "pp": 3,
+      "outros": 1,
+      "total": 5,
+      "vencidas": 4,
+      "vencidasAc": 1,
+      "vencidasPp": 3,
+      "maxCt": 19,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V905919",
@@ -1553,7 +2045,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V905919",
+      "credenciado": "SKY CELL",
+      "data": "2026-10-19",
+      "ac": 0,
+      "pp": 1,
+      "outros": 1,
+      "total": 2,
+      "vencidas": 2,
+      "vencidasAc": 0,
+      "vencidasPp": 1,
+      "maxCt": 74,
+      "tipoVencidas": "PP"
+    }
   },
   {
     "pdv": "V905977",
@@ -1578,7 +2084,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": null,
     "pctPos": null,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V905977",
+      "credenciado": "FAGS CONEXAO",
+      "data": "2026-10-19",
+      "ac": 6,
+      "pp": 3,
+      "outros": 0,
+      "total": 9,
+      "vencidas": 9,
+      "vencidasAc": 6,
+      "vencidasPp": 3,
+      "maxCt": 22,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V906172",
@@ -1603,7 +2123,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V906247",
@@ -1628,7 +2149,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V906382",
@@ -1653,7 +2175,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 5.1037,
     "pctPos": 0.7837451260849971,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V906382",
+      "credenciado": "CUBERO TELECOM",
+      "data": "2026-10-19",
+      "ac": 8,
+      "pp": 4,
+      "outros": 0,
+      "total": 12,
+      "vencidas": 9,
+      "vencidasAc": 7,
+      "vencidasPp": 2,
+      "maxCt": 21,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V906455",
@@ -1678,7 +2214,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V906515",
@@ -1703,7 +2240,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": null,
     "pctPos": null,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V906515",
+      "credenciado": "ELETROCONSERTOS",
+      "data": "2026-10-19",
+      "ac": 0,
+      "pp": 1,
+      "outros": 0,
+      "total": 1,
+      "vencidas": 1,
+      "vencidasAc": 0,
+      "vencidasPp": 1,
+      "maxCt": 3,
+      "tipoVencidas": "PP"
+    }
   },
   {
     "pdv": "V906688",
@@ -1728,7 +2279,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 5.1037,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V906688",
+      "credenciado": "A N SATELITES",
+      "data": "2026-10-19",
+      "ac": 2,
+      "pp": 3,
+      "outros": 0,
+      "total": 5,
+      "vencidas": 1,
+      "vencidasAc": 0,
+      "vencidasPp": 1,
+      "maxCt": 5,
+      "tipoVencidas": "PP"
+    }
   },
   {
     "pdv": "V906712",
@@ -1753,7 +2318,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": null,
     "pctPos": null,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V906712",
+      "credenciado": "ELETRONICA RTV",
+      "data": "2026-10-19",
+      "ac": 1,
+      "pp": 0,
+      "outros": 0,
+      "total": 1,
+      "vencidas": 1,
+      "vencidasAc": 1,
+      "vencidasPp": 0,
+      "maxCt": 6,
+      "tipoVencidas": "AT"
+    }
   },
   {
     "pdv": "V906740",
@@ -1778,7 +2357,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V906743",
@@ -1803,7 +2383,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V906833",
@@ -1828,7 +2409,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 22,
     "metaPos": 55,
     "pctPos": 1.4545454545454546,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V906833",
+      "credenciado": "INOVA SAT TV POR ASSINATURA",
+      "data": "2026-10-19",
+      "ac": 6,
+      "pp": 10,
+      "outros": 2,
+      "total": 18,
+      "vencidas": 18,
+      "vencidasAc": 6,
+      "vencidasPp": 10,
+      "maxCt": 12,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V906896",
@@ -1853,7 +2448,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 11.05802,
     "pctPos": 0.09043210267299208,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V906896",
+      "credenciado": "AURISAT",
+      "data": "2026-10-19",
+      "ac": 1,
+      "pp": 6,
+      "outros": 3,
+      "total": 10,
+      "vencidas": 10,
+      "vencidasAc": 1,
+      "vencidasPp": 6,
+      "maxCt": 132,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V907101",
@@ -1878,7 +2487,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 3,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V907184",
@@ -1903,7 +2513,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 5.1037,
     "pctPos": 6.269961008679977,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V907184",
+      "credenciado": "GOLDEN DIGITAL",
+      "data": "2026-10-19",
+      "ac": 23,
+      "pp": 37,
+      "outros": 9,
+      "total": 69,
+      "vencidas": 57,
+      "vencidasAc": 18,
+      "vencidasPp": 35,
+      "maxCt": 19,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V907245",
@@ -1928,7 +2552,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 8.93147,
     "pctPos": 1.1196365211997579,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V907245",
+      "credenciado": "SKY MAIS OFICINA ELETRO - ELETRONICOS",
+      "data": "2026-10-19",
+      "ac": 1,
+      "pp": 0,
+      "outros": 0,
+      "total": 1,
+      "vencidas": 1,
+      "vencidasAc": 1,
+      "vencidasPp": 0,
+      "maxCt": 1,
+      "tipoVencidas": "AT"
+    }
   },
   {
     "pdv": "V907260",
@@ -1953,7 +2591,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V907261",
@@ -1978,7 +2617,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V907263",
@@ -2003,7 +2643,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V404601",
+      "credenciado": "MUNDO ELETRONICO",
+      "data": "2026-10-19",
+      "ac": 2,
+      "pp": 0,
+      "outros": 2,
+      "total": 4,
+      "vencidas": 4,
+      "vencidasAc": 2,
+      "vencidasPp": 0,
+      "maxCt": 78,
+      "tipoVencidas": "AT"
+    }
   },
   {
     "pdv": "V907327",
@@ -2028,7 +2682,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": null,
     "pctPos": null,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V907327",
+      "credenciado": "S R CONFECCOES E COSMETICOS",
+      "data": "2026-10-19",
+      "ac": 2,
+      "pp": 1,
+      "outros": 2,
+      "total": 5,
+      "vencidas": 5,
+      "vencidasAc": 2,
+      "vencidasPp": 1,
+      "maxCt": 12,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V907350",
@@ -2053,7 +2721,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0.47024744420514075,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V907350",
+      "credenciado": "TECSAT",
+      "data": "2026-10-19",
+      "ac": 5,
+      "pp": 7,
+      "outros": 1,
+      "total": 13,
+      "vencidas": 12,
+      "vencidasAc": 5,
+      "vencidasPp": 6,
+      "maxCt": 7,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V907412",
@@ -2078,7 +2760,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V907517",
@@ -2103,7 +2786,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0.9404948884102815,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "D402502",
+      "credenciado": "PONTO DAS ANTENAS",
+      "data": "2026-10-19",
+      "ac": 1,
+      "pp": 6,
+      "outros": 0,
+      "total": 7,
+      "vencidas": 7,
+      "vencidasAc": 1,
+      "vencidasPp": 6,
+      "maxCt": 24,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V907538",
@@ -2128,7 +2825,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V907569",
@@ -2153,7 +2851,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V907586",
@@ -2178,7 +2877,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": null,
     "pctPos": null,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V907631",
@@ -2203,7 +2903,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V907688",
@@ -2228,7 +2929,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V907748",
@@ -2253,7 +2955,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0.47024744420514075,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V907748",
+      "credenciado": "STEPHANIE TUDO EM ANTENAS",
+      "data": "2026-10-19",
+      "ac": 6,
+      "pp": 5,
+      "outros": 2,
+      "total": 13,
+      "vencidas": 11,
+      "vencidasAc": 4,
+      "vencidasPp": 5,
+      "maxCt": 73,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V907849",
@@ -2278,7 +2994,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": null,
     "pctPos": null,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V907974",
@@ -2303,7 +3020,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": null,
     "pctPos": null,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V907974",
+      "credenciado": "SATRIANY TELECOM",
+      "data": "2026-10-19",
+      "ac": 0,
+      "pp": 1,
+      "outros": 0,
+      "total": 1,
+      "vencidas": 1,
+      "vencidasAc": 0,
+      "vencidasPp": 1,
+      "maxCt": 31,
+      "tipoVencidas": "PP"
+    }
   },
   {
     "pdv": "V908011",
@@ -2328,7 +3059,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V908036",
@@ -2353,7 +3085,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V908244",
@@ -2378,7 +3111,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": null,
     "pctPos": null,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V908288",
@@ -2403,7 +3137,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": null,
     "pctPos": null,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V908305",
@@ -2428,7 +3163,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 5.1037,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V908314",
@@ -2453,7 +3189,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V908316",
@@ -2478,7 +3215,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V908316",
+      "credenciado": "MB SAT",
+      "data": "2026-10-19",
+      "ac": 1,
+      "pp": 3,
+      "outros": 1,
+      "total": 5,
+      "vencidas": 2,
+      "vencidasAc": 0,
+      "vencidasPp": 1,
+      "maxCt": 17,
+      "tipoVencidas": "PP"
+    }
   },
   {
     "pdv": "V908338",
@@ -2503,7 +3254,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 3,
     "pctPos": 0.3333333333333333,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V908338",
+      "credenciado": "FOCUS SAT",
+      "data": "2026-10-19",
+      "ac": 2,
+      "pp": 3,
+      "outros": 0,
+      "total": 5,
+      "vencidas": 5,
+      "vencidasAc": 2,
+      "vencidasPp": 3,
+      "maxCt": 56,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V908420",
@@ -2528,7 +3293,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V908420",
+      "credenciado": "56.134.595 MARCIO SO",
+      "data": "2026-10-19",
+      "ac": 2,
+      "pp": 1,
+      "outros": 0,
+      "total": 3,
+      "vencidas": 3,
+      "vencidasAc": 2,
+      "vencidasPp": 1,
+      "maxCt": 4,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V908479",
@@ -2553,7 +3332,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": "0",
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V908479",
+      "credenciado": "SERVNET SERVICO DE TELECOM",
+      "data": "2026-10-19",
+      "ac": 0,
+      "pp": 1,
+      "outros": 0,
+      "total": 1,
+      "vencidas": 1,
+      "vencidasAc": 0,
+      "vencidasPp": 1,
+      "maxCt": 3,
+      "tipoVencidas": "PP"
+    }
   },
   {
     "pdv": "V908489",
@@ -2578,7 +3371,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V908514",
@@ -2603,7 +3397,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0.47024744420514075,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V908514",
+      "credenciado": "RC SAT",
+      "data": "2026-10-19",
+      "ac": 5,
+      "pp": 4,
+      "outros": 0,
+      "total": 9,
+      "vencidas": 9,
+      "vencidasAc": 5,
+      "vencidasPp": 4,
+      "maxCt": 8,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V908519",
@@ -2628,7 +3436,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V908519",
+      "credenciado": "QUEZIA TEIXEIRA DE FREITAS BRANDAO",
+      "data": "2026-10-19",
+      "ac": 4,
+      "pp": 10,
+      "outros": 2,
+      "total": 16,
+      "vencidas": 16,
+      "vencidasAc": 4,
+      "vencidasPp": 10,
+      "maxCt": 145,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V908521",
@@ -2653,7 +3475,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 0,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V908524",
@@ -2678,7 +3501,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": null,
     "pctPos": null,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "M000061",
+      "credenciado": "CONNECT SAT",
+      "data": "2026-10-19",
+      "ac": 4,
+      "pp": 8,
+      "outros": 1,
+      "total": 13,
+      "vencidas": 12,
+      "vencidasAc": 4,
+      "vencidasPp": 7,
+      "maxCt": 18,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V908542",
@@ -2703,7 +3540,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 3,
     "pctPos": 1,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V908542",
+      "credenciado": "INTELSAT TELECOM",
+      "data": "2026-10-19",
+      "ac": 1,
+      "pp": 2,
+      "outros": 0,
+      "total": 3,
+      "vencidas": 3,
+      "vencidasAc": 1,
+      "vencidasPp": 2,
+      "maxCt": 9,
+      "tipoVencidas": "Ambos"
+    }
   },
   {
     "pdv": "V908589",
@@ -2728,7 +3579,21 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 2.12654,
     "pctPos": 0,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V908589",
+      "credenciado": "FABIO MAXIMILIANO DOS SANTOS",
+      "data": "2026-10-19",
+      "ac": 1,
+      "pp": 1,
+      "outros": 0,
+      "total": 2,
+      "vencidas": 1,
+      "vencidasAc": 1,
+      "vencidasPp": 0,
+      "maxCt": 1,
+      "tipoVencidas": "AT"
+    }
   },
   {
     "pdv": "V908593",
@@ -2753,7 +3618,8 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": null,
     "pctPos": null,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": null
   },
   {
     "pdv": "V908600",
@@ -2778,6 +3644,20 @@ export const SKY_PDVS_DATA = [
     "vendasSeguro": 0,
     "metaPos": 5.1037,
     "pctPos": 0.39187256304249857,
-    "permanencia": null
+    "permanencia": null,
+    "bkl": {
+      "pdv": "V908600",
+      "credenciado": "ARS TELECOMUNICAÇÕESE INFRAESTRUTURA",
+      "data": "2026-10-19",
+      "ac": 5,
+      "pp": 9,
+      "outros": 2,
+      "total": 16,
+      "vencidas": 14,
+      "vencidasAc": 5,
+      "vencidasPp": 9,
+      "maxCt": 11,
+      "tipoVencidas": "Ambos"
+    }
   }
 ];

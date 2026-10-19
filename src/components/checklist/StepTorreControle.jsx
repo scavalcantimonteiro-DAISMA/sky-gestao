@@ -1,5 +1,5 @@
 import React from 'react';
-import { Radio, AlertTriangle, Users, AlertCircle, Wrench, FileWarning } from 'lucide-react';
+import { Radio, AlertTriangle, Users, AlertCircle, Wrench, FileWarning, Sparkles, CheckCircle2, Clock } from 'lucide-react';
 import PhotoUploader from './PhotoUploader';
 
 export default function StepTorreControle({ data, onChange }) {
@@ -32,6 +32,47 @@ export default function StepTorreControle({ data, onChange }) {
           Acompanhamento operacional das ordens de serviço (O.S.s) e equipes em campo.
         </p>
       </div>
+
+      {/* Banner Informativo de Integração com o BKL do Projeto SKY */}
+      {data.pdv && (
+        <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-rose-500/30 rounded-2xl p-4 text-white shadow-md space-y-2 animate-in fade-in">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="p-1.5 rounded-lg bg-rose-600/30 text-rose-400 border border-rose-500/40">
+                <Sparkles className="w-4 h-4" />
+              </span>
+              <div>
+                <strong className="text-sm font-bold text-rose-300 block">
+                  Backlog (BKL) Integrado • PDV {data.pdv}
+                </strong>
+                <span className="text-xs text-slate-400">
+                  {data.credenciado ? `${data.credenciado} — ` : ''}Dados oficiais de O.S.s em Caixa e Vencidas puxados automaticamente
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 text-xs font-semibold px-2.5 py-1 rounded-xl bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 self-start sm:self-auto shrink-0">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Valores preenchidos da Nuvem</span>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-slate-300 border-t border-slate-700/60">
+            <span>AT em Caixa: <strong className="text-white font-bold">{tc.osAtCaixa ?? 0}</strong></span>
+            <span>•</span>
+            <span>PP em Caixa: <strong className="text-white font-bold">{tc.osPpCaixa ?? 0}</strong></span>
+            <span>•</span>
+            <span>
+              Vencidas: <strong className={tc.temOsVencidas ? "text-rose-400 font-bold" : "text-emerald-400 font-bold"}>
+                {tc.temOsVencidas ? `${tc.qtdVencidas} (${tc.tipoVencidas})` : '0 (Sem vencidas)'}
+              </strong>
+            </span>
+            <span className="text-slate-400 italic text-[11px] sm:ml-auto">
+              (Você pode ajustar qualquer campo abaixo se houve baixa no dia)
+            </span>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Quantas O.S.s de AT em Caixa */}

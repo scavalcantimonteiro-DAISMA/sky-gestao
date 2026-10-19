@@ -150,12 +150,18 @@ export default function StepCredenciado({ data, onChange, onAutoFillPdv }) {
               <Sparkles className="w-4 h-4" />
               Buscar PDV / Credenciado (Base Projeto SKY)
             </label>
-            <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-300">
-              <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
-              <span>
-                Planilha Ativa: <strong className="text-white">{meta?.sourceName || 'Resultados atualizados.xlsx'}</strong>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[11px] text-slate-300">
+              <span className="flex items-center gap-1.5">
+                <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+                Planilha: <strong className="text-white">{meta?.sourceName || 'Resultados atualizados.xlsx'}</strong>
                 {meta?.updatedAt && ` (${formatUpdateDate(meta.updatedAt)})`}
               </span>
+              {meta?.bklData && (
+                <span className="flex items-center gap-1 text-rose-300">
+                  <span>•</span>
+                  <span>BKL Nuvem: <strong className="text-white">{meta.bklData}</strong> ({meta.bklTotalOS || 0} O.S.s)</span>
+                </span>
+              )}
             </div>
           </div>
 
@@ -235,10 +241,15 @@ export default function StepCredenciado({ data, onChange, onAutoFillPdv }) {
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-3 text-[11px] text-slate-400">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-400">
                         <span>TA.AT: <strong className="text-slate-200">{taAt}</strong></span>
                         <span>TA.PP: <strong className="text-slate-200">{taPp}</strong></span>
                         <span>Retiradas: <strong className="text-slate-200">{ret}</strong></span>
+                        {p.bkl && (p.bkl.ac > 0 || p.bkl.pp > 0 || p.bkl.vencidas > 0) && (
+                          <span className="text-blue-300 font-semibold">
+                            BKL: {p.bkl.ac} AT • {p.bkl.pp} PP {p.bkl.vencidas > 0 ? `• ⚠️ ${p.bkl.vencidas} venc.` : ''}
+                          </span>
+                        )}
                         {p.vendasPos > 0 && (
                           <span>Vendas Pós: <strong className="text-emerald-400">{p.vendasPos}</strong></span>
                         )}
@@ -374,8 +385,34 @@ export default function StepCredenciado({ data, onChange, onAutoFillPdv }) {
               </div>
             </div>
 
+            {/* Resumo de BKL Integrado */}
+            <div className="bg-slate-900/90 rounded-2xl p-3 border border-slate-700/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+              <div className="flex items-center gap-2.5">
+                <span className="px-2 py-0.5 rounded-lg bg-blue-600/30 text-blue-300 font-black border border-blue-500/40 text-[11px]">
+                  BKL
+                </span>
+                <div>
+                  <strong className="text-white block font-semibold">
+                    Setor Torre de Controle (Backlog de O.S.):
+                  </strong>
+                  <span className="text-slate-300">
+                    {selectedPdvData.bkl ? (
+                      <>
+                        <strong className="text-white font-bold">{selectedPdvData.bkl.ac}</strong> AT em Caixa • <strong className="text-white font-bold">{selectedPdvData.bkl.pp}</strong> PP em Caixa • <strong className={selectedPdvData.bkl.vencidas > 0 ? "text-rose-400 font-bold" : "text-emerald-400 font-bold"}>{selectedPdvData.bkl.vencidas} Vencidas ({selectedPdvData.bkl.tipoVencidas})</strong>
+                      </>
+                    ) : (
+                      <span className="text-emerald-400 font-medium">0 O.S.s em aberto no BKL</span>
+                    )}
+                  </span>
+                </div>
+              </div>
+              <span className="text-[11px] text-emerald-400 font-bold px-2 py-0.5 rounded-lg bg-emerald-950/60 border border-emerald-500/30 self-start sm:self-auto shrink-0">
+                ✅ Preenchido no Passo Torre
+              </span>
+            </div>
+
             <p className="text-[11px] text-slate-400 italic">
-              ⚡ Os campos dos setores <strong>Proprietário</strong> (T.A, Retiradas, Reaberturas), <strong>Vendas</strong> (Pós, Chip) e <strong>Estoque</strong> foram preenchidos automaticamente. Você pode ajustar qualquer número nos passos seguintes se desejar.
+              ⚡ Os campos dos setores <strong>Torre de Controle</strong> (O.S. AT, PP e Vencidas), <strong>Proprietário</strong> (T.A, Retiradas, Reaberturas), <strong>Vendas</strong> (Pós, Chip) e <strong>Estoque</strong> foram preenchidos automaticamente. Você pode ajustar qualquer número nos passos seguintes se desejar.
             </p>
           </div>
         )}
