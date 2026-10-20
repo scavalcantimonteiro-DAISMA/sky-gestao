@@ -95,11 +95,16 @@ export async function syncToCloudNow(actionLabel = 'Atualização', includeAtas 
   try {
     emitSyncStatus('syncing', { actionLabel });
 
-    const [pendencias, rotinas, atas] = await Promise.all([
+    const [rawPendencias, rawRotinas, rawAtas] = await Promise.all([
       db.pendencias.toArray(),
       db.rotinas.toArray(),
       db.atas.toArray()
     ]);
+
+    // Garante que todo item sem usuario receba 'Saulo' para não vazar para outros supervisores
+    const pendencias = rawPendencias.map((p) => ({ ...p, usuario: p.usuario || 'Saulo' }));
+    const rotinas = rawRotinas.map((r) => ({ ...r, usuario: r.usuario || 'Saulo' }));
+    const atas = rawAtas.map((a) => ({ ...a, usuario: a.usuario || 'Saulo' }));
 
     const syncRevisionId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const nowIso = new Date().toISOString();
@@ -226,15 +231,19 @@ async function applyCloudSnapshotToLocal(cloudData, forceApply = false) {
       };
     });
 
+    // Garante que todo item sem usuario receba 'Saulo'
+    const safeRemotePendencias = remotePendencias.map((p) => ({ ...p, usuario: p.usuario || 'Saulo' }));
+    const safeMergedRotinas = mergedRotinas.map((r) => ({ ...r, usuario: r.usuario || 'Saulo' }));
+
     await db.transaction('rw', db.pendencias, db.rotinas, async () => {
       await db.pendencias.clear();
-      if (remotePendencias.length > 0) {
-        await db.pendencias.bulkPut(remotePendencias);
+      if (safeRemotePendencias.length > 0) {
+        await db.pendencias.bulkPut(safeRemotePendencias);
       }
 
       await db.rotinas.clear();
-      if (mergedRotinas.length > 0) {
-        await db.rotinas.bulkPut(mergedRotinas);
+      if (safeMergedRotinas.length > 0) {
+        await db.rotinas.bulkPut(safeMergedRotinas);
       }
     });
 

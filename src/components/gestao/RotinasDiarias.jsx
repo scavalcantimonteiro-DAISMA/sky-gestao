@@ -36,9 +36,14 @@ export default function RotinasDiarias() {
     setLoading(true);
     try {
       const currentUser = getCurrentUser();
-      const userLogin = currentUser ? currentUser.login : 'Saulo';
+      const userLogin = (currentUser ? currentUser.login : 'Saulo').trim().toLowerCase();
+      const isMaster = userLogin === 'saulo';
       const items = await db.rotinas.toArray();
-      const userItems = items.filter((r) => !r.usuario || r.usuario === userLogin);
+      const userItems = items.filter((r) => {
+        const itemUser = (r.usuario || '').trim().toLowerCase();
+        if (isMaster) return !itemUser || itemUser === 'saulo';
+        return itemUser === userLogin;
+      });
       setRotinas(userItems);
       if (userItems.length > 0) {
         syncAllRoutinesWithNtfy();

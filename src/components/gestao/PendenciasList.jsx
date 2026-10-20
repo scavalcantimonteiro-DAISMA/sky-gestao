@@ -39,9 +39,14 @@ export default function PendenciasList() {
     setLoading(true);
     try {
       const currentUser = getCurrentUser();
-      const userLogin = currentUser ? currentUser.login : 'Saulo';
+      const userLogin = (currentUser ? currentUser.login : 'Saulo').trim().toLowerCase();
+      const isMaster = userLogin === 'saulo';
       const items = await db.pendencias.toArray();
-      const userItems = items.filter((p) => !p.usuario || p.usuario === userLogin);
+      const userItems = items.filter((p) => {
+        const itemUser = (p.usuario || '').trim().toLowerCase();
+        if (isMaster) return !itemUser || itemUser === 'saulo';
+        return itemUser === userLogin;
+      });
       setPendencias(userItems);
     } catch (err) {
       console.error('Erro ao carregar pendências:', err);

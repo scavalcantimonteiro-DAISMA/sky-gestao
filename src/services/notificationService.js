@@ -25,6 +25,16 @@ export function getLocalTodayStr(dateObj = new Date()) {
   return `${year}-${month}-${day}`;
 }
 
+// Valida se o registro pertence estritamente ao usuário logado (isola Saulo dos outros supervisores)
+export function isItemForUser(itemUsuario, currentLogin) {
+  const normUser = (currentLogin || 'Saulo').trim().toLowerCase();
+  const normItem = (itemUsuario || '').trim().toLowerCase();
+  if (normUser === 'saulo') {
+    return !normItem || normItem === 'saulo';
+  }
+  return normItem === normUser;
+}
+
 // Reproduz um som agradável de sino/alerta usando Web Audio API nativa
 export function playNotificationSound() {
   try {
@@ -158,7 +168,7 @@ export async function syncAllRoutinesWithNtfy() {
 
     const todasRotinas = await db.rotinas.toArray();
     const rotinasUsuario = todasRotinas.filter(
-      (r) => !r.usuario || r.usuario === currentUser.login
+      (r) => isItemForUser(r.usuario, currentUser.login)
     );
     const today = new Date();
     const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -185,7 +195,7 @@ export async function checkRoutineReminders() {
   try {
     const todasRotinas = await db.rotinas.toArray();
     const rotinasUsuario = todasRotinas.filter(
-      (r) => !r.usuario || r.usuario === currentUser.login
+      (r) => isItemForUser(r.usuario, currentUser.login)
     );
 
     for (const rotina of rotinasUsuario) {
@@ -263,7 +273,7 @@ export async function checkPendenciasReminders() {
   try {
     const todasPendencias = await db.pendencias.toArray();
     const pendencias = todasPendencias.filter(
-      (p) => !p.usuario || p.usuario === currentUser.login
+      (p) => isItemForUser(p.usuario, currentUser.login)
     );
 
     for (const p of pendencias) {
@@ -302,8 +312,8 @@ export async function buildMorningSummaryPayload() {
     db.rotinas.toArray()
   ]);
 
-  const pendencias = allPendencias.filter((p) => !p.usuario || p.usuario === userLogin);
-  const rotinas = allRotinas.filter((r) => !r.usuario || r.usuario === userLogin);
+  const pendencias = allPendencias.filter((p) => isItemForUser(p.usuario, userLogin));
+  const rotinas = allRotinas.filter((r) => isItemForUser(r.usuario, userLogin));
 
   const now = new Date();
   const abertas = pendencias.filter((p) => p.status === 'pendente');
@@ -349,7 +359,7 @@ export async function buildEveningSummaryPayload() {
   const userLogin = currentUser ? currentUser.login : 'Saulo';
 
   const allPendencias = await db.pendencias.toArray();
-  const pendencias = allPendencias.filter((p) => !p.usuario || p.usuario === userLogin);
+  const pendencias = allPendencias.filter((p) => isItemForUser(p.usuario, userLogin));
   const todayStr = getLocalTodayStr();
 
   const concluidasHoje = pendencias.filter(

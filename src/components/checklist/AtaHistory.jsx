@@ -20,10 +20,15 @@ export default function AtaHistory({ onNewChecklist }) {
     setLoading(true);
     try {
       const currentUser = getCurrentUser();
-      const userLogin = currentUser ? currentUser.login : 'Saulo';
+      const userLogin = (currentUser ? currentUser.login : 'Saulo').trim().toLowerCase();
+      const isMaster = userLogin === 'saulo';
       const allAtas = await db.atas.toArray();
       // Filtra para exibir apenas as atas do usuário atual (ou legadas sem usuário para Saulo)
-      const userAtas = allAtas.filter((a) => !a.usuario || a.usuario === userLogin);
+      const userAtas = allAtas.filter((a) => {
+        const itemUser = (a.usuario || '').trim().toLowerCase();
+        if (isMaster) return !itemUser || itemUser === 'saulo';
+        return itemUser === userLogin;
+      });
       // Ordena por data mais recente
       userAtas.sort((a, b) => new Date(b.dataVisita || b.createdAt) - new Date(a.dataVisita || a.createdAt));
       setAtas(userAtas);
