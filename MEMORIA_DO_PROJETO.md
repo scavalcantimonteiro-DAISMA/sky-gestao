@@ -63,7 +63,14 @@ O sistema é **100% Offline-First e Seguro** (todos os dados ficam gravados loca
 
 ---
 
-## 3. Como Rodar o Projeto em uma Nova Máquina
+## 4. Diagnóstico de Pendências & Proteção de Dados Multiusuário
+* **Segurança Absoluta dos Dados:** Todos os registros históricos do Saulo (JR SAT, C.I. Eletrônica, Carlinhos, Macazi, Pagamento Kleber, Romário/PAJEU, etc.) permanecem 100% preservados na nuvem (Firestore `core_state`) e no IndexedDB local.
+* **Diagnóstico da Visibilidade:** Como todas as 18 pendências do Saulo já haviam sido concluídas/executadas ao longo das semanas anteriores (com datas de execução registradas), o filtro inicial padrão `pendente` exibia 0 itens e lista vazia, dando a falsa impressão de que os dados tinham sumido.
+* **Melhorias Aplicadas:**
+  1. Se `pendentes === 0` e houver itens concluídos, a tela abre automaticamente na aba `Todas` com todas as 18 pendências visíveis de imediato.
+  2. Banner explicativo com botões rápidos para alternar entre `Executadas`, `Todas` ou reabrir qualquer item com 1 clique no botão `Reabrir`.
+  3. Contadores nos cards e abas agora detalham: `0 abertas • 18 concluídas no histórico`.
+  4. Sincronização em nuvem (`cloudSyncService.js`) com merge seguro por usuário: nenhum supervisor consegue sobrescrever ou apagar dados de outro usuário.
 
 1. Ter o **Node.js (versão 18+)** e **Git** instalados.
 2. Na pasta do projeto, executar:
