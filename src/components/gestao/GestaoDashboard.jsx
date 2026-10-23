@@ -139,7 +139,7 @@ export default function GestaoDashboard({ initialSubTab = 'dashboard' }) {
           }`}
         >
           <CheckCircle2 className="w-4 h-4" />
-          Minhas Pendências ({pendentes.length})
+          Minhas Pendências ({pendentes.length > 0 ? `${pendentes.length} abertas` : `${pendencias.length} no histórico`})
         </button>
 
         <button
@@ -206,7 +206,9 @@ export default function GestaoDashboard({ initialSubTab = 'dashboard' }) {
                 <Clock className="w-5 h-5" />
               </div>
               <div className="text-3xl font-black text-slate-900">{pendentes.length}</div>
-              <p className="text-xs text-slate-500">Para você resolver</p>
+              <p className="text-xs text-slate-500">
+                {executadas.length > 0 ? `${executadas.length} concluídas salvas` : 'Para você resolver'}
+              </p>
             </div>
 
             {/* Críticas (+6 dias na tela) */}

@@ -60,10 +60,14 @@ export default function HomeDashboard({ onSelectTab, currentUser: propUser }) {
         // Ordena atas para pegar a última
         myAtas.sort((a, b) => new Date(b.dataVisita || b.createdAt) - new Date(a.dataVisita || a.createdAt));
 
+        const executadas = myPendencias.filter((p) => p.status === 'executado');
+
         setStats({
           atasCount: myAtas.length,
           lastAta: myAtas.length > 0 ? myAtas[0] : null,
           pendentesCount: pendentes.length,
+          executadasCount: executadas.length,
+          totalPendenciasCount: myPendencias.length,
           criticasCount: criticas.length,
           rotinasCount: myRotinas.filter((r) => r.ativo).length
         });
@@ -185,19 +189,26 @@ export default function HomeDashboard({ onSelectTab, currentUser: propUser }) {
             {/* Resumo de Pendências e Rotinas */}
             <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 grid grid-cols-2 gap-3 text-xs">
               <div>
-                <span className="text-slate-400 block font-semibold text-[11px] uppercase">Pendências Abertas</span>
+                <span className="text-slate-400 block font-semibold text-[11px] uppercase">Pendências</span>
                 <span className="text-xl font-black text-slate-900 flex items-center gap-1.5">
                   {stats.pendentesCount}
+                  <span className="text-xs font-semibold text-slate-500">abertas</span>
                   {stats.criticasCount > 0 && (
                     <span className="text-[10px] font-bold text-rose-600 bg-rose-100 px-1.5 py-0.5 rounded-full">
                       {stats.criticasCount} críticas
                     </span>
                   )}
                 </span>
+                <span className="text-[11px] text-slate-500 block mt-0.5 font-medium">
+                  {stats.executadasCount > 0 ? `✓ ${stats.executadasCount} concluídas no histórico` : 'Tudo em dia'}
+                </span>
               </div>
               <div>
                 <span className="text-slate-400 block font-semibold text-[11px] uppercase">Rotinas Ativas</span>
                 <span className="text-xl font-black text-blue-600">{stats.rotinasCount}</span>
+                <span className="text-[11px] text-slate-500 block mt-0.5 font-medium">
+                  Diárias com som e push
+                </span>
               </div>
             </div>
           </div>

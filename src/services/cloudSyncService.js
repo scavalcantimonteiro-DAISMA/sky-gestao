@@ -8,6 +8,7 @@ import {
   onSnapshot
 } from 'firebase/firestore';
 import { db } from '../db';
+import { getCurrentUser } from './authService';
 
 const FIREBASE_CONFIG = {
   apiKey: 'AIzaSyCQfSfl8kGj5lfCMjz6FudCsfH9aKU6CHo',
@@ -95,6 +96,9 @@ export async function syncToCloudNow(actionLabel = 'Atualização', includeAtas 
   try {
     emitSyncStatus('syncing', { actionLabel });
 
+    const currentUser = getCurrentUser();
+    const currentLogin = (currentUser?.login || 'Saulo').trim().toLowerCase();
+
     const [rawPendencias, rawRotinas, rawAtas] = await Promise.all([
       db.pendencias.toArray(),
       db.rotinas.toArray(),
@@ -102,9 +106,49 @@ export async function syncToCloudNow(actionLabel = 'Atualização', includeAtas 
     ]);
 
     // Garante que todo item sem usuario receba 'Saulo' para não vazar para outros supervisores
-    const pendencias = rawPendencias.map((p) => ({ ...p, usuario: p.usuario || 'Saulo' }));
-    const rotinas = rawRotinas.map((r) => ({ ...r, usuario: r.usuario || 'Saulo' }));
-    const atas = rawAtas.map((a) => ({ ...a, usuario: a.usuario || 'Saulo' }));
+    const localPendencias = rawPendencias.map((p) => ({ ...p, usuario: p.usuario || 'Saulo' }));
+    const localRotinas = rawRotinas.map((r) => ({ ...r, usuario: r.usuario || 'Saulo' }));
+    const localAtas = rawAtas.map((a) => ({ ...a, usuario: a.usuario || 'Saulo' }));
+
+    // 1. Consulta o estado atual da nuvem para NUNCA apagar itens de outros usuários
+    const coreRef = doc(fs, SYNC_COLLECTION, CORE_DOC_ID);
+    let cloudPendencias = [];
+    let cloudRotinas = [];
+    try {
+      const snap = await getDoc(coreRef);
+      if (snap.exists()) {
+        const cData = snap.data();
+        cloudPendencias = JSON.parse(cData.pendenciasJson || '[]');
+        cloudRotinas = JSON.parse(cData.rotinasJson || '[]');
+      }
+    } catch (e) {
+      console.warn('Aviso ao consultar nuvem antes de sincronizar:', e);
+    }
+
+    // 2. Preserva integralmente os itens de outros usuários que estão na nuvem
+    const otherUsersPendencias = cloudPendencias.filter((cp) => {
+      const u = (cp.usuario || 'Saulo').trim().toLowerCase();
+      return u !== currentLogin;
+    });
+    const otherUsersRotinas = cloudRotinas.filter((cr) => {
+      const u = (cr.usuario || 'Saulo').trim().toLowerCase();
+      return u !== currentLogin;
+    });
+
+    // 3. Itens do usuário atual do banco local
+    const myLocalPendencias = localPendencias.filter((lp) => {
+      const u = (lp.usuario || 'Saulo').trim().toLowerCase();
+      return u === currentLogin;
+    });
+    const myLocalRotinas = localRotinas.filter((lr) => {
+      const u = (lr.usuario || 'Saulo').trim().toLowerCase();
+      return u === currentLogin;
+    });
+
+    // 4. Junta garantindo que nenhum item de outro usuário seja perdido
+    const pendencias = [...otherUsersPendencias, ...myLocalPendencias];
+    const rotinas = [...otherUsersRotinas, ...myLocalRotinas];
+    const atas = localAtas;
 
     const syncRevisionId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const nowIso = new Date().toISOString();
@@ -146,7 +190,6 @@ export async function syncToCloudNow(actionLabel = 'Atualização', includeAtas 
       }
     }
 
-    const coreRef = doc(fs, SYNC_COLLECTION, CORE_DOC_ID);
     await setDoc(coreRef, {
       syncRevisionId,
       atasRevisionId,

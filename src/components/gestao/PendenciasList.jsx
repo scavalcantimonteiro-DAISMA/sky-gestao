@@ -48,6 +48,13 @@ export default function PendenciasList() {
         return itemUser === userLogin;
       });
       setPendencias(userItems);
+
+      // Se todas as pendências já foram concluídas, abre automaticamente em 'todas'
+      // para o usuário nunca ver a tela em branco pensando que perdeu os dados
+      const pendentesCount = userItems.filter((p) => p.status === 'pendente').length;
+      if (pendentesCount === 0 && userItems.length > 0) {
+        setStatusFilter((prev) => (prev === 'pendente' ? 'todas' : prev));
+      }
     } catch (err) {
       console.error('Erro ao carregar pendências:', err);
     } finally {
@@ -671,13 +678,52 @@ export default function PendenciasList() {
       {loading ? (
         <div className="text-center py-12 text-slate-400">Carregando pendências...</div>
       ) : filteredItems.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-3xl border border-slate-200 p-8 space-y-3">
-          <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
-          <h4 className="font-bold text-slate-800 text-base">Tudo em dia!</h4>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto">
-            Nenhuma pendência encontrada com os filtros selecionados.
-          </p>
-        </div>
+        pendencias.length > 0 && statusFilter === 'pendente' ? (
+          <div className="text-center py-12 bg-white rounded-3xl border border-slate-200 p-8 space-y-4 shadow-sm animate-in fade-in">
+            <div className="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-inner">
+              <CheckCircle2 className="w-8 h-8" />
+            </div>
+            <div className="space-y-1">
+              <h4 className="font-black text-slate-900 text-lg">Tudo em dia! Nenhuma pendência em aberto.</h4>
+              <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto">
+                Todas as suas <strong>{pendencias.length} pendências</strong> anteriores foram 100% concluídas e estão salvas com segurança no histórico.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setStatusFilter('executado')}
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <Check className="w-4 h-4" />
+                Ver {pendencias.filter((p) => p.status === 'executado').length} Concluídas
+              </button>
+              <button
+                type="button"
+                onClick={() => setStatusFilter('todas')}
+                className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow transition cursor-pointer"
+              >
+                Ver Todas as {pendencias.length}
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsAdding(true)}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                Nova Pendência
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-12 bg-white rounded-3xl border border-slate-200 p-8 space-y-3">
+            <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
+            <h4 className="font-bold text-slate-800 text-base">Tudo em dia!</h4>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              Nenhuma pendência encontrada com os filtros selecionados.
+            </p>
+          </div>
+        )
       ) : (
         <div className="space-y-3">
           {filteredItems.map((item) => {
